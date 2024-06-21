@@ -1,0 +1,295 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<div class="infoContainer">
+  <button
+    type="button"
+    class="fa fa-arrow-left icon-button"
+    aria-hidden="true"
+    (click)="handleBack()"
+  ></button>
+  <h1 *ngIf="!formSelected">
+    Selecciona el tipo de perfil que deseas registrar
+  </h1>
+  <div class="selectForm" *ngIf="!formSelected">
+    <button
+      class="rounded-button"
+      type="button"
+      (click)="selectFormType('PACIENTE')"
+    >
+      <img src="../../../assets/paciente.jpeg" />
+      <p>Paciente</p>
+    </button>
+    <button
+      class="rounded-button"
+      type="button"
+      (click)="selectFormType('ESPECIALISTA')"
+    >
+      <img src="../../../assets/especialista.jpeg" />
+      <p>Especialista</p>
+    </button>
+    <button
+      *ngIf="isAdmin"
+      class="rounded-button"
+      type="button"
+      (click)="selectFormType('ADMIN')"
+    >
+      <img src="../../../assets/Admin.jpg" />
+      <p>Administrador</p>
+    </button>
+  </div>
+
+  <div class="form" *ngIf="formSelected">
+    <h2>Registro {{ formSelected.toLowerCase() }}</h2>
+
+    <form [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <!-- email -->
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="text"
+          name="email"
+          placeholder="Email"
+          formControlName="email"
+        />
+        <p
+          *ngIf="
+            form.get('email')?.invalid &&
+            (form.get('email')?.dirty || form.get('email')?.touched)
+          "
+        >
+          Ingrese un email válido.
+        </p>
+      </div>
+      <!-- password -->
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="password"
+          name="password"
+          placeholder="Password"
+          formControlName="password"
+        />
+        <p
+          *ngIf="
+            form.get('password')?.invalid &&
+            (form.get('password')?.dirty || form.get('password')?.touched)
+          "
+        >
+          La contraseña debe tener al menos 6 caracteres.
+        </p>
+      </div>
+      <!-- dni -->
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="text"
+          name="dni"
+          placeholder="Dni"
+          formControlName="dni"
+        />
+        <p
+          *ngIf="
+            form.get('dni')?.invalid &&
+            (form.get('dni')?.dirty || form.get('dni')?.touched)
+          "
+        >
+          El DNI debe ser de 9 a 10 dígitos numéricos.
+        </p>
+      </div>
+      <!-- age -->
+      <div class="align-input-error">
+        <input
+          type="number"
+          name="age"
+          placeholder="Edad"
+          formControlName="age"
+        />
+        <p
+          *ngIf="
+            form.get('age')?.invalid &&
+            (form.get('age')?.dirty || form.get('age')?.touched)
+          "
+        >
+          La edad debe ser un número entre 1 y 100.
+        </p>
+      </div>
+      <!-- name -->
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="text"
+          name="name"
+          placeholder="Nombre"
+          formControlName="name"
+        />
+        <p
+          *ngIf="
+            form.get('name')?.invalid &&
+            (form.get('name')?.dirty || form.get('name')?.touched)
+          "
+        >
+          Ingrese un nombre válido (solo letras).
+        </p>
+      </div>
+      <!-- lastname -->
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="text"
+          name="lastname"
+          placeholder="Apellido"
+          formControlName="lastname"
+        />
+        <p
+          *ngIf="
+            form.get('lastname')?.invalid &&
+            (form.get('lastname')?.dirty || form.get('lastname')?.touched)
+          "
+        >
+          Ingrese un apellido válido (solo letras).
+        </p>
+      </div>
+
+      <!-- patient -->
+      <div *ngIf="formSelected === 'PACIENTE'">
+        <label class="label" for="healthInsurance">
+          Seleccione su obra social
+        </label>
+        <select id="healthInsurance" multiple formControlName="healthInsurance">
+          <option
+            *ngFor="let option of healthInsuranceOptions"
+            [value]="option.name"
+          >
+            {{ option.name }}
+          </option>
+        </select>
+        <p *ngIf="form.get('healthInsurance')?.invalid" class="error-msg">
+          Tiene que seleccionar una obra social (sólo se puede seleccionar una)
+        </p>
+        <p
+          *ngIf="
+            form.get('healthInsurance')?.valid &&
+            form.get('healthInsurance')?.value
+          "
+        >
+          Obra social seleccionada:
+          <em>
+            {{ form.get("healthInsurance")?.value }}
+          </em>
+        </p>
+
+        <!-- file upload multiple images -->
+        <div class="mb-3">
+          <label for="images" class="form-label label">
+            Elige dos imágenes de perfil
+          </label>
+          <input
+            accept="image/*"
+            class="form-control"
+            type="file"
+            id="images"
+            multiple
+            formControlName="images"
+            (change)="handleImages($event)"
+          />
+        </div>
+        <p *ngIf="form.get('images')?.invalid" class="error-msg">
+          Tiene que seleccionar dos imagenes de perfil
+        </p>
+      </div>
+
+      <!-- specialist -->
+      <div
+        *ngIf="formSelected === 'ESPECIALISTA' && specialtiesOptions.length > 0"
+      >
+        <label class="label" for="specialties">
+          Seleccione sus especialidades
+        </label>
+        <select
+          id="specialties"
+          multiple
+          formControlName="specialties"
+          (change)="handleSelect($event)"
+        >
+          <option
+            *ngFor="let option of specialtiesOptions"
+            [value]="option.name"
+          >
+            {{ option.name }}
+          </option>
+        </select>
+        <p>No encuentra su especialidad? Ingrese una nueva</p>
+        <div class="speciality-input">
+          <input
+            autocomplete="false"
+            type="text"
+            name="otherSpeciality"
+            placeholder="Otra Especialidad"
+            formControlName="otherSpeciality"
+          />
+          <button class="addBtn" type="button" (click)="addOtherSpecialty()">
+            Agregar
+          </button>
+        </div>
+        <p *ngIf="form.get('otherSpeciality')?.invalid" class="error-msg">
+          Tiene que ingresar una especialidad válida. No puede tener caracteres
+          especiales ni números.
+        </p>
+        <p *ngIf="form.get('specialties')?.invalid" class="error-msg">
+          Seleccione o ingrese al menos una especialidad.
+        </p>
+
+        <div *ngIf="form.get('specialties')?.value?.length > 0">
+          <p>Especialidades seleccionadas:</p>
+          <ul>
+            <li
+              *ngFor="let specialty of form.get('specialties')?.value"
+              class="specialtiesList"
+            >
+              {{ specialty }}
+              <button
+                class="fa fa-times icon-button"
+                aria-hidden="true"
+                (click)="removeSpecialty(specialty)"
+              ></button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <!-- file upload -->
+      <div
+        class="mb-3"
+        *ngIf="formSelected === 'ESPECIALISTA' || formSelected === 'ADMIN'"
+      >
+        <label for="images" class="form-label"> Sube una foto de perfil </label>
+        <input
+          accept="image/*"
+          class="form-control"
+          formControlName="images"
+          type="file"
+          id="images"
+          (change)="handleImages($event)"
+        />
+      </div>
+      <p
+        *ngIf="formSelected !== 'PACIENTE' && form.get('images')?.invalid"
+        class="error-msg"
+      >
+        Tiene que seleccionar una imagen de perfil
+      </p>
+
+      <!-- end -->
+      <p *ngIf="errorMessage && errorMessage.length > 0" class="error-msg">
+        Error al crear cuenta: {{ errorMessage }}
+      </p>
+      <button type="submit" class="btn">Registrarse</button>
+    </form>
+  </div>
+</div>

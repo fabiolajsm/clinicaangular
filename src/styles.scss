@@ -1,1 +1,91 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  background-color: #edf2f4;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 15px;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.form {
+  padding-left: 45px;
+  padding-bottom: 45px;
+  padding-right: 45px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+
+  input {
+    font-family: "Roboto", sans-serif;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    outline: 0;
+    font-size: 15px;
+    text-align: start;
+    box-sizing: border-box;
+    background: #f5f5f5;
+    ::placeholder {
+      color: #90a4ae;
+    }
+  }
+
+  .align-input-error {
+    display: flex;
+    flex-direction: column;
+
+    p {
+      color: red;
+    }
+  }
+  .error-msg {
+    color: red;
+  }
+
+  .btn {
+    font-family: "Poppins", sans-serif;
+    font-size: 15px;
+    outline: 0;
+    border: 0;
+    width: 100%;
+    padding: 15px;
+    background: #ef233c;
+    color: #fafafa;
+    text-transform: uppercase;
+  }
+
+  .message {
+    color: #8d99ae;
+    text-align: center;
+    font-family: "Roboto", sans-serif;
+    font-size: 14px;
+    a {
+      text-decoration: underline;
+      color: #2b2d42;
+    }
+  }
+}
+
+.label {
+  font-family: "Poppins", sans-serif;
+}
+
+.infoContainer {
+  width: fit-content;
+  margin: auto;
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+  }
+  h2 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}

@@ -1,0 +1,18 @@
+.register-link {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 14px;
+  color: #2b2d42;
+  text-align: center;
+
+  p {
+    margin-right: 10px;
+    display: inline;
+  }
+  a {
+    text-decoration: underline;
+    color: #2b2d42;
+    font-weight: 500;
+    cursor: pointer;
+  }
+}

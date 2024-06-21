@@ -1,0 +1,72 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<div class="infoContainer">
+  <button
+    type="button"
+    class="fa fa-arrow-left icon-button"
+    aria-hidden="true"
+    (click)="handleBack()"
+  ></button>
+  <div class="form">
+    <h1>Iniciar sesión</h1>
+
+    <form [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="text"
+          name="email"
+          placeholder="Email"
+          formControlName="email"
+        />
+        <p
+          *ngIf="
+            form.get('email')?.invalid &&
+            (form.get('email')?.dirty || form.get('email')?.touched)
+          "
+        >
+          Ingrese un email válido
+        </p>
+      </div>
+      <div class="align-input-error">
+        <input
+          autocomplete="false"
+          type="password"
+          name="password"
+          placeholder="Password"
+          formControlName="password"
+        />
+        <p
+          *ngIf="
+            form.get('password')?.invalid &&
+            (form.get('password')?.dirty || form.get('password')?.touched)
+          "
+        >
+          Ingrese una contraseña válida
+        </p>
+      </div>
+
+      <p *ngIf="errorMessage && errorMessage.length > 0" class="error-msg">
+        Error al Iniciar sesión: {{ errorMessage }}
+      </p>
+      <button type="submit" class="btn">Login</button>
+    </form>
+
+    <h2 class="quickAccessText">Acceso rápido</h2>
+    <div class="quickAccessButtonsContainer" *ngIf="users && users.length > 0">
+      <div *ngFor="let user of users">
+        <button type="button" (click)="handleLogin(user.email)">
+          <img [src]="user.profilePicture" alt="Foto de perfil" />
+        </button>
+        <p>{{ user.role }}</p>
+      </div>
+    </div>
+  </div>
+</div>

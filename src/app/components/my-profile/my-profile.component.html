@@ -1,0 +1,192 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<button
+  type="button"
+  class="fa fa-arrow-left icon-button"
+  aria-hidden="true"
+  (click)="handleBack()"
+></button>
+
+<div class="container py-5">
+  <ng-container *ngIf="user; else emptyDetail">
+    <div class="row">
+      <div class="col-lg-4">
+        <!-- header -->
+        <div class="card mb-4">
+          <div class="card-body text-center">
+            <img
+              [src]="user.profilePicture"
+              alt="Imagen de perfil"
+              class="rounded-circle img-fluid"
+              style="width: 150px"
+            />
+            <h5 class="my-3">{{ user.name }} {{ user.lastname }}</h5>
+            <p class="text-muted mb-1">Rol: {{ user.role }}</p>
+          </div>
+        </div>
+      </div>
+      <!-- End of header -->
+
+      <!-- Basic info -->
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Email</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">{{ user.email }}</p>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">DNI</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">{{ user.dni }}</p>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Edad</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">{{ user.age }}</p>
+              </div>
+            </div>
+            <ng-container *ngIf="user.role !== 'ADMIN'">
+              <hr />
+            </ng-container>
+            <div class="row" *ngIf="user.role !== 'ADMIN'">
+              <div class="col-sm-3">
+                <p class="mb-0">{{ getHeader() }}</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">{{ getData() }}</p>
+              </div>
+            </div>
+            <ng-container *ngIf="user.role === 'PACIENTE'">
+              <hr />
+            </ng-container>
+            <div class="row" *ngIf="user.role === 'PACIENTE'">
+              <div class="col-sm-3">
+                <p class="mb-0">Segunda imagen de perfil</p>
+              </div>
+              <div class="col-sm-9">
+                <img
+                  [src]="getSecondProfilePicture()"
+                  alt="Imagen de perfil"
+                  class="img-fluid"
+                  style="width: 150px"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End of basic info -->
+
+        <div class="row" *ngIf="user.role === 'ESPECIALISTA'">
+          <div class="col-md-6">
+            <div class="card mb-4 mb-md-0">
+              <div class="card-body">
+                <p class="mb-4 text-primary font-italic me-1">Mis horarios</p>
+                <p *ngIf="!schedules">No tiene un horario designado</p>
+                <ng-container *ngIf="schedules">
+                  <ul class="list-group list-group-flush rounded-3">
+                    <li
+                      class="list-group-item d-flex justify-content-between align-items-center p-3"
+                    >
+                      <p class="mb-0">Lunes a viernes</p>
+                      <p class="mb-0">
+                        {{ schedules.start_time }} a {{ schedules.end_time }} hs
+                      </p>
+                    </li>
+                  </ul>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+          <!-- otra row mas adelante -->
+          <div class="col-md-6">
+            <div class="card mb-4 mb-md-0">
+              <div class="card-body">
+                <p class="mb-4 text-primary font-italic me-1">
+                  Selecciona un horario de lunes a viernes
+                </p>
+                <form [formGroup]="form" (ngSubmit)="handleSubmit()">
+                  <div class="row mb-3">
+                    <div class="col">
+                      <label for="start_time" class="form-label">
+                        Tiempo de inicio
+                      </label>
+                      <input
+                        type="time"
+                        class="form-control"
+                        id="start_time"
+                        name="start_time"
+                        formControlName="start"
+                        required
+                      />
+                    </div>
+                    <div class="col">
+                      <label for="end_time" class="form-label">
+                        Tiempo de cierre
+                      </label>
+                      <input
+                        type="time"
+                        class="form-control"
+                        id="end_time"
+                        name="end_time"
+                        formControlName="end"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <p
+                    *ngIf="
+                      form.get('start')?.invalid &&
+                      (form.get('start')?.dirty || form.get('start')?.touched)
+                    "
+                    class="error-msg"
+                  >
+                    El tiempo de inicio debe ser menor al de inicio
+                  </p>
+                  <p
+                    *ngIf="
+                      form.get('end')?.invalid &&
+                      (form.get('end')?.dirty || form.get('end')?.touched)
+                    "
+                    class="error-msg"
+                  >
+                    El tiempo de cierre debe ser mayor al de inicio
+                  </p>
+                  <button
+                    type="submit"
+                    data-mdb-button-init
+                    data-mdb-ripple-init
+                    class="btn btn-outline-primary ms-1"
+                  >
+                    Asignar nuevo horario
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #emptyDetail>
+    <p>No hay datos para mostrar</p>
+  </ng-template>
+</div>

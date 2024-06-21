@@ -1,0 +1,38 @@
+<nav>
+  <ul>
+    <li>Clínica Online</li>
+    <li class="listOption">
+      <a href="https://www.linkedin.com/in/fabiolajsm/" target="_blank">
+        <i class="fab fa-linkedin"></i>
+      </a>
+    </li>
+  </ul>
+  <ul>
+    <li
+      class="listOption"
+      *ngIf="isLogged && isAdmin"
+      routerLink="/manageUsers"
+    >
+      <a>
+        <i class="fa fa-users" aria-hidden="true"></i>
+        <p>Usuarios</p>
+      </a>
+    </li>
+    <li class="listOption" *ngIf="isLogged" routerLink="/myProfile">
+      <a>
+        <i class="fa fa-user" aria-hidden="true"></i>
+        <p>Mi perfil</p>
+      </a>
+    </li>
+    <li *ngIf="isLogged">
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+        *ngIf="isLogged"
+        (click)="handleLogout()"
+      >
+        Logout
+      </button>
+    </li>
+  </ul>
+</nav>

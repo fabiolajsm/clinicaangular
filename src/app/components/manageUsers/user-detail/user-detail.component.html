@@ -1,0 +1,43 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<ng-container *ngIf="userSelected; else emptyDetail">
+  <!-- Card Start -->
+  <div class="card">
+    <h5 class="card-header">{{ userSelected.role }}</h5>
+    <div class="card-body">
+      <h5 class="card-title">
+        {{ userSelected.name }} {{ userSelected.lastname }}
+      </h5>
+      <p class="card-text">
+        DNI: {{ userSelected.dni }}, Edad: {{ userSelected.age }}
+      </p>
+      <!-- Show info by role -->
+      <p>{{ getData(userSelected.role) }}</p>
+      <button
+        *ngIf="userSelected.role === 'ESPECIALISTA'"
+        type="button"
+        class="btn btn-outline-danger"
+        (click)="handleEnableSpecialist(userSelected.id)"
+      >
+        {{ getButtonMessage() }}
+      </button>
+      <img
+        class="d-block w-100 image"
+        [src]="userSelected.profilePicture"
+        alt="Foto de perfil"
+      />
+    </div>
+  </div>
+  <!-- End of card -->
+</ng-container>
+
+<ng-template #emptyDetail>
+  <p>No ha seleccionado un usuario</p>
+</ng-template>

@@ -1,0 +1,62 @@
+<!-- navbar -->
+<app-navbar />
+<!-- schedule medical appointment -->
+<div class="schedule">
+  <div class="schedule-info">
+    <h1>¡Su salud es lo más importante para nosotros!</h1>
+    <p>Reciba atención médica de calidad desde la comodidad de su hogar.</p>
+    <div *ngIf="!isLogged">
+      <button (click)="goToLogin()">Iniciar sesión</button>
+      <button (click)="goToRegister()">Registrarse</button>
+    </div>
+    <div *ngIf="isLogged">
+      <button (click)="goToAppointments()">Agendar un turno</button>
+    </div>
+  </div>
+</div>
+
+<!-- info -->
+<div class="info">
+  <div class="card">
+    <i class="fas fa-clock"></i>
+    <h2>Horario de atención</h2>
+    <p>Lunes a Viernes de 8:00 a 19:00h. Sábados de 8:00 a 14:00h</p>
+  </div>
+  <div class="card">
+    <i class="fas fa-phone"></i>
+    <h2>Contacto</h2>
+    <p>123-456-7890, 1011-456-7890</p>
+  </div>
+  <div class="card">
+    <i class="fas fa-map-marker-alt"></i>
+    <h2>Ubicación</h2>
+    <p>123 Calle mafalda, CABA, Argentina</p>
+  </div>
+</div>
+
+<!-- about us -->
+<div class="about-us">
+  <div class="about-item">
+    <img src="../../../assets/aboutus.jpg" alt="Quiénes somos" />
+    <div>
+      <h2>¿Quiénes somos?</h2>
+      <p>
+        Somos un equipo comprometido de profesionales médicos dedicados a
+        proporcionar atención de calidad y personalizada a cada uno de nuestros
+        pacientes.
+      </p>
+    </div>
+  </div>
+
+  <div class="about-item">
+    <img src="../../../assets/atencion.jpeg" alt="Atención de Calidad" />
+    <div>
+      <h2>Atención de Calidad</h2>
+      <p>
+        Nuestro compromiso es garantizar que cada paciente reciba la mejor
+        atención posible, utilizando tecnología de vanguardia y tratamientos
+        actualizados.
+      </p>
+    </div>
+  </div>
+</div>
