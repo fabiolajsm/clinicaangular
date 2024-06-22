@@ -6,6 +6,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { AppoimentService } from '../../../services/appoiment.service';
 import { AuthService } from '../../../services/auth.service';
 import { UserInterface } from '../../../interfaces/user.interface';
+import { getAuth } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-appoiment-table',
@@ -35,8 +36,26 @@ export class AppoimentTableComponent {
     this.authService.getUsers().subscribe((response) => {
       this.users = response;
     });
+    const currentUserEmail = getAuth().currentUser?.email;
+    const role = this.authService.getRole();
     this.appoimentService.getAppoiments().subscribe((response) => {
-      this.appoiments = response; // TODO: ordenar por orden de fechas
+      this.appoiments = response
+        .filter((item) => {
+          if (!currentUserEmail || role === 'ADMIN') return true;
+          return (
+            item.professional === currentUserEmail ||
+            item.patient == currentUserEmail
+          );
+        })
+        .sort((a, b) => {
+          if ((a as Appoiment).status < (b as Appoiment).status) {
+            return -1;
+          }
+          if ((a as Appoiment).status > (b as Appoiment).status) {
+            return 1;
+          }
+          return 0;
+        });
       this.spinner.hide();
     });
   }

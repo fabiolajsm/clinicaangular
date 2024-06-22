@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { RouterModule } from '@angular/router';
-import { Appoiment } from '../../../interfaces/appoiment.interface';
+import { Appoiment, Status } from '../../../interfaces/appoiment.interface';
 import { AuthService } from '../../../services/auth.service';
 import {
   FormControl,
@@ -11,6 +11,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { AppoimentService } from '../../../services/appoiment.service';
 
 @Component({
   selector: 'app-appoiment-actions',
@@ -30,11 +31,12 @@ export class AppoimentActionsComponent {
 
   role: string = '';
   modalTitle: string = '';
-  action: string = '';
+  action: Status | undefined = undefined;
 
   constructor(
     private spinner: NgxSpinnerService,
-    private authService: AuthService
+    private authService: AuthService,
+    private appoimentService: AppoimentService
   ) {
     this.form = this.createForm();
   }
@@ -47,7 +49,7 @@ export class AppoimentActionsComponent {
       ]),
       diagnosis: new FormControl(
         null,
-        this.action === 'FINALIZAR' ? Validators.required : null
+        this.action === 'REALIZADO' ? Validators.required : null
       ),
     });
   }
@@ -57,6 +59,10 @@ export class AppoimentActionsComponent {
   }
 
   ngOnChanges(): void {
+    this.handleActionsVisibility();
+  }
+
+  handleActionsVisibility() {
     if (this.itemSelected) {
       const status = this.itemSelected?.status;
 
@@ -102,23 +108,23 @@ export class AppoimentActionsComponent {
     }
   }
 
-  handleClickAction(actionName: string) {
+  handleClickAction(actionName: Status) {
     this.action = actionName;
     switch (actionName) {
-      case 'CANCELAR':
+      case 'CANCELADO':
         this.modalTitle = 'Cancelar turno';
         break;
-      case 'RECHAZAR':
+      case 'RECHAZADO':
         this.modalTitle = 'Rechazar turno';
         break;
-      case 'ACEPTAR':
+      case 'ACEPTADO':
         this.modalTitle = 'Aceptar turno';
         break;
-      case 'FINALIZAR':
+      case 'REALIZADO':
         this.modalTitle = 'Finalizar turno';
         break;
       default:
-        this.action = '';
+        this.action = undefined;
         break;
     }
   }
@@ -129,11 +135,33 @@ export class AppoimentActionsComponent {
     const comment = this.form.get('comment')?.value;
     const diagnosis = this.form.get('diagnosis')?.value;
 
-    if (this.action === 'FINALIZAR' && !diagnosis) {
+    if (this.action === 'REALIZADO' && !diagnosis) {
       this.form.get('diagnosis')?.setErrors({ required: true });
+    } else {
+      this.form.get('diagnosis')?.setErrors(null);
     }
-    if (this.form.valid) {
-      console.log('entree');
+    if (this.action === 'ACEPTADO') {
+      this.form.get('comment')?.setErrors(null);
+    }
+
+    if (this.form.valid && this.itemSelected?.id && this.action) {
+      this.spinner.show();
+      this.itemSelected.status = this.action;
+      this.appoimentService.updateAppoimentStatus(
+        this.itemSelected.id,
+        this.action
+      );
+      this.appoimentService.getAppoiments().subscribe((response) => {
+        const appoiment: Appoiment = response.filter(
+          (item) => item.id == this.itemSelected?.id
+        )[0];
+        if (appoiment) {
+          this.itemSelected = appoiment;
+          this.handleActionsVisibility();
+        }
+        this.spinner.hide();
+      });
+      this.form.reset();
     }
   }
 }

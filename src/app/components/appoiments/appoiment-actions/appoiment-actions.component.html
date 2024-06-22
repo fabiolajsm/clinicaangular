@@ -25,7 +25,7 @@
             {{ modalTitle }}
           </h1>
         </div>
-        <div class="modal-body" *ngIf="action !== 'ACEPTAR'">
+        <div class="modal-body" *ngIf="action !== 'ACEPTADO'">
           <form [formGroup]="form">
             <div class="form-floating">
               <textarea
@@ -36,7 +36,7 @@
                 formControlName="comment"
               ></textarea>
               <label for="comment">{{
-                action !== "FINALIZAR" ? "Comentario" : "Comentario/reseña"
+                action !== "REALIZADO" ? "Comentario" : "Comentario/reseña"
               }}</label>
             </div>
             <p
@@ -49,7 +49,7 @@
               Tiene que ingresar un comentario (hasta 300 caracteres)
             </p>
             <br />
-            <div class="form-floating" *ngIf="action === 'FINALIZAR'">
+            <div class="form-floating" *ngIf="action === 'REALIZADO'">
               <textarea
                 class="form-control"
                 placeholder="Ingresar comentario"
@@ -81,6 +81,7 @@
           </button>
           <button
             type="button"
+            data-bs-dismiss="modal"
             class="btn btn-primary"
             (click)="handleSubmit()"
           >
@@ -98,7 +99,7 @@
       class="btn btn-outline-secondary"
       data-bs-toggle="modal"
       data-bs-target="#staticBackdrop"
-      (click)="handleClickAction('CANCELAR')"
+      (click)="handleClickAction('CANCELADO')"
     >
       Cancelar turno
     </button>
@@ -108,7 +109,7 @@
       class="btn btn-outline-danger"
       data-bs-toggle="modal"
       data-bs-target="#staticBackdrop"
-      (click)="handleClickAction('RECHAZAR')"
+      (click)="handleClickAction('RECHAZADO')"
     >
       Rechazar turno
     </button>
@@ -118,7 +119,7 @@
       class="btn btn-outline-success"
       data-bs-toggle="modal"
       data-bs-target="#staticBackdrop"
-      (click)="handleClickAction('ACEPTAR')"
+      (click)="handleClickAction('ACEPTADO')"
     >
       Aceptar turno
     </button>
@@ -128,7 +129,7 @@
       class="btn btn-outline-success"
       data-bs-toggle="modal"
       data-bs-target="#staticBackdrop"
-      (click)="handleClickAction('FINALIZAR')"
+      (click)="handleClickAction('REALIZADO')"
     >
       Finalizar turno
     </button>
