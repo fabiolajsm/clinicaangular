@@ -1,0 +1,136 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<ng-container *ngIf="itemSelected">
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="staticBackdrop"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+    tabindex="-1"
+    aria-labelledby="staticBackdropLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">
+            {{ modalTitle }}
+          </h1>
+        </div>
+        <div class="modal-body" *ngIf="action !== 'ACEPTAR'">
+          <form [formGroup]="form">
+            <div class="form-floating">
+              <textarea
+                class="form-control"
+                placeholder="Ingresar comentario"
+                id="comment"
+                style="height: 100px"
+                formControlName="comment"
+              ></textarea>
+              <label for="comment">{{
+                action !== "FINALIZAR" ? "Comentario" : "Comentario/reseña"
+              }}</label>
+            </div>
+            <p
+              *ngIf="
+                form.get('comment')?.invalid &&
+                (form.get('comment')?.dirty || form.get('comment')?.touched)
+              "
+              class="error-msg"
+            >
+              Tiene que ingresar un comentario (hasta 300 caracteres)
+            </p>
+            <br />
+            <div class="form-floating" *ngIf="action === 'FINALIZAR'">
+              <textarea
+                class="form-control"
+                placeholder="Ingresar comentario"
+                id="diagnosis"
+                style="height: 100px"
+                formControlName="diagnosis"
+              ></textarea>
+              <label for="diagnosis">Diagnostico</label>
+            </div>
+            <p
+              *ngIf="
+                form.get('diagnosis')?.invalid &&
+                (form.get('diagnosis')?.dirty || form.get('diagnosis')?.touched)
+              "
+              class="error-msg"
+            >
+              Tiene que ingresar un diagnóstico (hasta 300 caracteres)
+            </p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            (click)="handleCancelAction()"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="handleSubmit()"
+          >
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end of modal -->
+  <div class="buttonsContainer">
+    <button
+      *ngIf="hasToShowCancelAction"
+      type="button"
+      class="btn btn-outline-secondary"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('CANCELAR')"
+    >
+      Cancelar turno
+    </button>
+    <button
+      *ngIf="hasToShowCancelAction"
+      type="button"
+      class="btn btn-outline-danger"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('RECHAZAR')"
+    >
+      Rechazar turno
+    </button>
+    <button
+      *ngIf="hasToShowAcceptAction"
+      type="button"
+      class="btn btn-outline-success"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('ACEPTAR')"
+    >
+      Aceptar turno
+    </button>
+    <button
+      *ngIf="hasToShowFinishAction"
+      type="button"
+      class="btn btn-outline-success"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('FINALIZAR')"
+    >
+      Finalizar turno
+    </button>
+  </div>
+</ng-container>

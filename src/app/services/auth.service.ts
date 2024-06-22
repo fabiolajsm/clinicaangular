@@ -11,6 +11,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   updateDoc,
@@ -93,7 +94,7 @@ export class AuthService {
   }
 
   getUserByEmail(email: string): Observable<UserInterface | undefined> {
-    const usersRef = collection(this.firestore, 'users');
+    const usersRef = collection(this.firestore, this.userCollectionName);
     const q = query(usersRef, where('email', '==', email));
 
     return new Observable<UserInterface | undefined>((observer) => {
@@ -114,6 +115,10 @@ export class AuthService {
 
   isAuthenticated(): Observable<boolean> {
     return this.user$.pipe(map((user) => user !== null));
+  }
+
+  getRole(): string {
+    return localStorage.getItem('role') ?? '';
   }
 
   getIsRole(role: Role): boolean {

@@ -10,6 +10,16 @@
   <ul>
     <li
       class="listOption"
+      *ngIf="isLogged && isPatient"
+      routerLink="/appointment"
+    >
+      <a>
+        <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+        <p>Mis turnos</p>
+      </a>
+    </li>
+    <li
+      class="listOption"
       *ngIf="isLogged && isAdmin"
       routerLink="/manageUsers"
     >

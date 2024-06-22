@@ -3,14 +3,16 @@
 <!-- schedule medical appointment -->
 <div class="schedule">
   <div class="schedule-info">
-    <h1>¡Su salud es lo más importante para nosotros!</h1>
-    <p>Reciba atención médica de calidad desde la comodidad de su hogar.</p>
+    <h1>{{ getTitle() }}</h1>
+    <p>{{ getSubtitle() }}</p>
     <div *ngIf="!isLogged">
       <button (click)="goToLogin()">Iniciar sesión</button>
       <button (click)="goToRegister()">Registrarse</button>
     </div>
     <div *ngIf="isLogged">
-      <button (click)="goToAppointments()">Agendar un turno</button>
+      <button (click)="goToAppointments()">
+        {{ getGoToAppoimentsText() }}
+      </button>
     </div>
   </div>
 </div>

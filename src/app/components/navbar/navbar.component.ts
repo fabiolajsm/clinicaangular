@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class NavbarComponent {
   isLogged: boolean = false;
   isAdmin: boolean = false;
+  isPatient: boolean = false;
 
   constructor(private router: Router, private authService: AuthService) {}
 
@@ -21,6 +22,7 @@ export class NavbarComponent {
       this.isLogged = isAuthenticated;
     });
     this.isAdmin = this.authService.getIsRole('ADMIN');
+    this.isPatient = this.authService.getIsRole('PACIENTE');
   }
 
   handleLogout(): void {

@@ -43,10 +43,6 @@ body {
       color: red;
     }
   }
-  .error-msg {
-    color: red;
-  }
-
   .btn {
     font-family: "Poppins", sans-serif;
     font-size: 15px;
@@ -69,6 +65,10 @@ body {
       color: #2b2d42;
     }
   }
+}
+
+.error-msg {
+  color: red;
 }
 
 .label {

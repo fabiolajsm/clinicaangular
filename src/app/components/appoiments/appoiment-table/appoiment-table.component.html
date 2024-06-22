@@ -1,0 +1,82 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<button
+  type="button"
+  class="fa fa-arrow-left icon-button"
+  aria-hidden="true"
+  (click)="handleBack()"
+></button>
+
+<h1>Turnos</h1>
+<table class="table table-bordered" *ngIf="appoiments && appoiments.length > 0">
+  <thead>
+    <tr>
+      <th scope="col"></th>
+      <th scope="col">Día</th>
+      <th scope="col">Hora</th>
+      <th scope="col">Especialidad</th>
+      <th
+        scope="col"
+        *ngIf="
+          currentUserRole &&
+          (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
+        "
+      >
+        Especialista
+      </th>
+      <th
+        scope="col"
+        *ngIf="
+          currentUserRole &&
+          (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
+        "
+      >
+        Paciente
+      </th>
+      <th scope="col">Estado</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let item of appoiments">
+    <tr>
+      <th scope="row">
+        <input
+          class="form-check-input"
+          type="radio"
+          name="flexRadioDefault"
+          id="flexRadioDefault1"
+          (click)="handleClick(item.id)"
+        />
+      </th>
+      <td>{{ item.day }}</td>
+      <td>{{ item.time }}</td>
+      <td>
+        {{ item.speciality }}
+      </td>
+      <td
+        *ngIf="
+          currentUserRole &&
+          (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
+        "
+      >
+        {{ item.professional }}
+      </td>
+      <td
+        *ngIf="
+          currentUserRole &&
+          (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
+        "
+      >
+        {{ item.patient }}
+      </td>
+      <td>{{ item.status }}</td>
+    </tr>
+  </tbody>
+</table>
+<p *ngIf="!appoiments">No hay turnos</p>

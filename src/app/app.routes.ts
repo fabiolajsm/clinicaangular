@@ -46,7 +46,7 @@ export const routes: Routes = [
   {
     path: 'appoiment',
     loadComponent: () =>
-      import('./components/appoiment/appoiment.component').then(
+      import('./components/appoiments/appoiment/appoiment.component').then(
         (c) => c.AppoimentComponent
       ),
     canMatch: [authGuard],
