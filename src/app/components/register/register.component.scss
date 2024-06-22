@@ -83,3 +83,10 @@ select[multiple] {
   display: flex;
   flex-direction: row;
 }
+
+.captcha {
+  justify-content: center;
+  display: flex;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}

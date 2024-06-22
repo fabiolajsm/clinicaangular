@@ -25,6 +25,7 @@ import { Specialities } from '../../interfaces/specialities.interface';
 import { SpecialitiesService } from '../../services/specialities.service';
 import { HealthInsuranceService } from '../../services/health-insurance.service';
 import { HealthInsurance } from '../../interfaces/healthInsurance.interface';
+import { RecaptchaModule } from 'ng-recaptcha';
 
 @Component({
   selector: 'app-register',
@@ -35,6 +36,7 @@ import { HealthInsurance } from '../../interfaces/healthInsurance.interface';
     RouterModule,
     SweetAlert2Module,
     NgxSpinnerModule,
+    RecaptchaModule,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -49,6 +51,8 @@ export class RegisterComponent {
   imagesUrls: string[] = [];
   errorMessage: string = '';
   isAdmin: boolean = false;
+  captcha: string | undefined = undefined;
+  showCaptchaError: boolean = false;
 
   constructor(
     private router: Router,
@@ -110,7 +114,7 @@ export class RegisterComponent {
         null,
         this.formSelected === 'ESPECIALISTA' ? Validators.required : null
       ),
-      otherSpecialty: new FormControl(''),
+      otherSpeciality: new FormControl(''),
       images: new FormControl(null),
     });
   }
@@ -236,13 +240,16 @@ export class RegisterComponent {
 
   handleSubmit() {
     this.spinner.show();
+    if (!this.captcha) {
+      this.showCaptchaError = true;
+    }
     Object.values(this.form.controls).forEach((control) => {
       control.markAsTouched();
     });
     const hasValidInfoByRole = this.validateFormByRole();
     const hasImages = this.validateImages(this.imagesAux.length);
 
-    if (this.form.valid && hasValidInfoByRole && hasImages) {
+    if (this.form.valid && hasValidInfoByRole && hasImages && this.captcha) {
       this.handleUploadImages(this.imagesAux)
         .then((imageUrls) => {
           if (!this.formSelected) return;
@@ -335,5 +342,10 @@ export class RegisterComponent {
         this.specialitiesService.addSpeciality(specialtyName);
       }
     }
+  }
+
+  resolved(captchaResponse: any) {
+    this.captcha = captchaResponse;
+    this.showCaptchaError = false;
   }
 }

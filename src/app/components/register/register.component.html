@@ -162,7 +162,6 @@
           Ingrese un apellido válido (solo letras).
         </p>
       </div>
-
       <!-- patient -->
       <div *ngIf="formSelected === 'PACIENTE'">
         <label class="label" for="healthInsurance">
@@ -294,6 +293,16 @@
       <!-- end -->
       <p *ngIf="errorMessage && errorMessage.length > 0" class="error-msg">
         Error al crear cuenta: {{ errorMessage }}
+      </p>
+      <!-- captcha -->
+      <div class="captcha">
+        <re-captcha
+          (resolved)="resolved($event)"
+          siteKey="6LdVrv4pAAAAAAbiwSXY4g61OYbHVlCKtGSvAfke"
+        ></re-captcha>
+      </div>
+      <p *ngIf="showCaptchaError" class="error-msg">
+        Tiene que validar el captcha
       </p>
       <button type="submit" class="btn">Registrarse</button>
     </form>
