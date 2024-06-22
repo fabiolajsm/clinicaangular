@@ -49,7 +49,9 @@ export class AppoimentActionsComponent {
       ]),
       diagnosis: new FormControl(
         null,
-        this.action === 'REALIZADO' ? Validators.required : null
+        this.action === 'REALIZADO'
+          ? [Validators.required, Validators.maxLength(301)]
+          : null
       ),
     });
   }
@@ -151,6 +153,12 @@ export class AppoimentActionsComponent {
         this.itemSelected.id,
         this.action
       );
+      if (comment) {
+        this.appoimentService.updateComment(this.itemSelected.id, comment);
+      }
+      if (diagnosis) {
+        this.appoimentService.updateDiagnosis(this.itemSelected.id, diagnosis);
+      }
       this.appoimentService.getAppoiments().subscribe((response) => {
         const appoiment: Appoiment = response.filter(
           (item) => item.id == this.itemSelected?.id

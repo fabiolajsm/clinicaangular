@@ -35,13 +35,13 @@ export class AppoimentService {
       status: status,
     });
   }
-  updateCommentStatus(appId: string, newReview: string) {
+  updateComment(appId: string, newReview: string) {
     const appRef = doc(this.firestore, this.collectionName, appId);
     updateDoc(appRef, {
       review: newReview,
     });
   }
-  updateDiagnosisStatus(appId: string, newDiagnosis: string) {
+  updateDiagnosis(appId: string, newDiagnosis: string) {
     const appRef = doc(this.firestore, this.collectionName, appId);
     updateDoc(appRef, {
       diagnosis: newDiagnosis,
