@@ -15,7 +15,11 @@
     (click)="handleBack()"
   ></button>
 
-  <mat-stepper [linear]="true" #stepper>
+  <mat-stepper
+    [linear]="true"
+    #stepper
+    (selectionChange)="handleStepperSelectionChange($event)"
+  >
     <!-- Step 1 -->
     <mat-step>
       <ng-template matStepLabel>Solicitar turno</ng-template>
@@ -125,9 +129,10 @@
     <mat-step>
       <ng-template matStepLabel>Confirmar</ng-template>
       <div *ngIf="appointmentRequested">
-        <h3>Confirmación de la cita:</h3>
+        <h3>Confirmación del turno</h3>
         <p>
-          <strong>Especialista:</strong> {{ appointmentRequested.professional }}
+          <strong>Especialista:</strong>
+          {{ appointmentRequested.professional_name }}
         </p>
         <p>
           <strong>Especialidad:</strong> {{ appointmentRequested.specialty }}

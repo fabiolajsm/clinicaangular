@@ -39,13 +39,13 @@ export class AppointmentTableComponent {
     const role = this.authService.getRole();
     this.appointmentService.getAppointments().subscribe((response) => {
       this.appointments = response
-        .filter((item) => {
-          if (!currentUserEmail || role === 'ADMIN') return true;
-          return (
-            item.professional === currentUserEmail ||
-            item.patient == currentUserEmail
-          );
-        })
+        // .filter((item) => { TODO
+        //   if (!currentUserEmail || role === 'ADMIN') return true;
+        //   return (
+        //     item.professional === currentUserEmail ||
+        //     item.patient == currentUserEmail
+        //   );
+        // })
         .sort((a, b) => {
           if ((a as Appointment).status < (b as Appointment).status) {
             return -1;

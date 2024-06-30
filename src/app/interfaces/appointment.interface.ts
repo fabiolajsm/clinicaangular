@@ -7,12 +7,13 @@ export type Status =
 export interface Appointment {
   id?: string | undefined;
   day: string;
+  date: string; // format: "yyyy-MM-dd"
   start_time: string;
   end_time: string;
   specialty: string;
-  professional: string;
-  patient: string;
   professional_id: string;
+  professional_name: string;
+  patient_id: string;
+  patient_name: string;
   status: Status;
-  date: string; // format: "yyyy-MM-dd"
 }

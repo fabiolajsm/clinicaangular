@@ -3,6 +3,7 @@ import {
   CollectionReference,
   Firestore,
   QueryConstraint,
+  addDoc,
   collection,
   collectionData,
   doc,
@@ -19,6 +20,14 @@ import { Appointment } from '../interfaces/appointment.interface';
 export class AppointmentService {
   firestore = inject(Firestore);
   collectionName = 'appointments';
+
+  createAppointment(newApp: Appointment) {
+    const appRef: CollectionReference = collection(
+      this.firestore,
+      this.collectionName
+    );
+    addDoc(appRef, newApp);
+  }
 
   getAppointments(): Observable<Appointment[]> {
     const appRef: CollectionReference = collection(
@@ -42,9 +51,9 @@ export class AppointmentService {
       id
     );
     const appQuery = query(appRef, specialtyConstraint);
-    return collectionData(appQuery, {
-      idField: 'id',
-    }) as Observable<Appointment[]>;
+    return collectionData(appQuery, { idField: 'id' }) as Observable<
+      Appointment[]
+    >;
   }
 
   updateAppointmentStatus(appId: string, status: string) {

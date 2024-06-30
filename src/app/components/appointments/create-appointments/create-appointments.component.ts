@@ -1,10 +1,5 @@
 import { Component } from '@angular/core';
-import {
-  FormBuilder,
-  Validators,
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Specialists, UserInterface } from '../../../interfaces/user.interface';
 import { SpecialtiesService } from '../../../services/specialties.service';
@@ -15,27 +10,27 @@ import {
   Schedules,
   Specialties,
 } from '../../../interfaces/specialties.interface';
-import { Appointment } from '../../../interfaces/appointment.interface';
+import { Appointment, Status } from '../../../interfaces/appointment.interface';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { getAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { AppointmentService } from '../../../services/appointment.service';
 
 @Component({
-  selector: 'app-create',
+  selector: 'app-create-appointments',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     NgxSpinnerModule,
     MatButtonModule,
     MatStepperModule,
   ],
-  templateUrl: './create.component.html',
-  styleUrl: './create.component.scss',
+  templateUrl: './create-appointments.component.html',
+  styleUrl: './create-appointments.component.scss',
 })
-export class CreateComponent {
+export class CreateAppointmentsComponent {
   form = this._formBuilder.group({
     professional: ['', Validators.required],
     specialty: ['', Validators.required],
@@ -70,17 +65,28 @@ export class CreateComponent {
 
   appointmentRequested: Appointment | undefined = undefined;
   hasConfirm: boolean | undefined = undefined;
+  patientId: string | undefined = undefined;
+  patientName: string | undefined = undefined;
 
   constructor(
     private _formBuilder: FormBuilder,
     private authService: AuthService,
     private specialtiesService: SpecialtiesService,
+    private appointmentService: AppointmentService,
     private spinner: NgxSpinnerService,
     private router: Router
   ) {}
 
   ngOnInit() {
     this.spinner.show();
+    const email = getAuth().currentUser?.email;
+    // get patient
+    if (email) {
+      this.authService.getUserByEmail(email).subscribe((response) => {
+        this.patientId = response?.id;
+        this.patientName = `${response?.name} ${response?.lastname}`;
+      });
+    }
     // Get specialties
     this.specialtiesService
       .getSpecialties()
@@ -110,10 +116,6 @@ export class CreateComponent {
     });
   }
 
-  ngOnChanges() {
-    console.log(this.hasConfirm, 'hasConfirm');
-  }
-
   handleSelectProfessional(email: string) {
     this.form.get('professional')?.setValue(null);
     if (!email) return;
@@ -123,11 +125,18 @@ export class CreateComponent {
     const currentSchedule = this.schedules?.find(
       (item) => item.user_id === itemSelected?.id
     );
-    if (itemSelected?.id && currentSchedule) {
-      this.form.get('professional')?.setValue(itemSelected?.id);
-      this.professionalSelected = itemSelected;
-      this.professionalSchedule = currentSchedule;
-      this.loadDays();
+    if (!itemSelected?.id || !currentSchedule) return;
+    this.form.get('professional')?.setValue(itemSelected?.id);
+    this.professionalSelected = itemSelected;
+    this.professionalSchedule = currentSchedule;
+
+    if (this.professionalSelected.id) {
+      this.appointmentService
+        .getAppointmentsBySpecialist(this.professionalSelected?.id)
+        .subscribe((response) => {
+          this.datesTaken = response;
+          this.loadDays();
+        });
     }
   }
 
@@ -179,7 +188,7 @@ export class CreateComponent {
     const appointmentTimes: ScheduleTime[] = [];
     let current = new Date(start);
 
-    while (current <= end) {
+    while (current < end) {
       const startTime = current.toLocaleTimeString('es-ES', {
         hour: '2-digit',
         minute: '2-digit',
@@ -205,7 +214,8 @@ export class CreateComponent {
       (appt) =>
         appt.date === this.formatDate(date) &&
         appt.start_time === startTime &&
-        appt.end_time === endTime
+        appt.end_time === endTime &&
+        (appt.status === 'PENDIENTE' || appt.status === 'ACEPTADO')
     );
     return taken;
   }
@@ -228,9 +238,10 @@ export class CreateComponent {
   }
 
   selectDay(day: { date: Date; availableTimes: ScheduleTime[] }) {
-    if (this.selectedDay === day) {
-      this.selectedDay = undefined;
-    } else {
+    if (this.selectedDay !== day || !this.selectedDay) {
+      this.selectTime = undefined;
+      this.form.get('start_time')?.setValue(null);
+      this.form.get('end_time')?.setValue(null);
       this.selectedDay = day;
       const formattedDate = this.formatDate(day.date);
       this.form.get('day')?.setValue(this.getWeekDay(day.date));
@@ -251,17 +262,20 @@ export class CreateComponent {
   }
 
   handleSubmit() {
-    const email = getAuth().currentUser?.email;
+    if (!this.form.valid) return;
 
-    if (this.form.valid && email) {
+    if (this.patientId && this.patientName) {
       const requestData: Appointment = {
         day: this.form.get('day')?.value ?? '',
         start_time: this.form.get('start_time')?.value ?? '',
         end_time: this.form.get('end_time')?.value ?? '',
         specialty: this.form.get('specialty')?.value ?? '',
         professional_id: this.form.get('professional')?.value ?? '',
-        patient: email,
-        professional: this.professionalSelected?.email ?? '',
+        professional_name:
+          `${this.professionalSelected?.name} ${this.professionalSelected?.lastname}` ??
+          '',
+        patient_id: this.patientId,
+        patient_name: this.patientName,
         status: 'PENDIENTE',
         date: this.form.get('date')?.value ?? '' ?? '',
       };
@@ -271,8 +285,15 @@ export class CreateComponent {
   }
 
   handleCreateRequestAppointment() {
+    if (!this.appointmentRequested) return;
     this.hasConfirm = true;
-    this.handleReset();
+    this.appointmentService.createAppointment(this.appointmentRequested);
+  }
+
+  handleStepperSelectionChange(event: any) {
+    if (event.previouslySelectedIndex === 2 && event.selectedIndex === 0) {
+      this.handleReset();
+    }
   }
 
   handleReset() {
@@ -286,6 +307,7 @@ export class CreateComponent {
     this.datesTaken = [];
     this.selectedDay = undefined;
     this.selectTime = undefined;
+    this.appointmentRequested = undefined;
   }
 
   handleBack() {

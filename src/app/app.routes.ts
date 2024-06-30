@@ -54,9 +54,9 @@ export const routes: Routes = [
   {
     path: 'createAppointment',
     loadComponent: () =>
-      import('./components/appointments/create/create.component').then(
-        (c) => c.CreateComponent
-      ),
+      import(
+        './components/appointments/create-appointments/create-appointments.component'
+      ).then((c) => c.CreateAppointmentsComponent),
     canMatch: [authGuard],
   },
   {

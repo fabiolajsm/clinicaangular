@@ -17,7 +17,10 @@
 <h1>Turnos</h1>
 <p *ngIf="!appointments.length">Todavía no hay turnos</p>
 
-<table class="table table-bordered" *ngIf="appointments && appointments.length > 0">
+<table
+  class="table table-bordered"
+  *ngIf="appointments && appointments.length > 0"
+>
   <thead>
     <tr>
       <th scope="col"></th>
@@ -67,7 +70,7 @@
           (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
         "
       >
-        {{ item.professional }}
+        {{ item.professional_name }}
       </td>
       <td
         *ngIf="
@@ -75,7 +78,7 @@
           (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
         "
       >
-        {{ item.patient }}
+        {{ item.patient_name }}
       </td>
       <td>{{ item.status }}</td>
     </tr>
