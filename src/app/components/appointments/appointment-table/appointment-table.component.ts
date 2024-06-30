@@ -1,22 +1,21 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { Appoiment } from '../../../interfaces/appoiment.interface';
+import { Appointment } from '../../../interfaces/appointment.interface';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
-import { AppoimentService } from '../../../services/appoiment.service';
+import { AppointmentService } from '../../../services/appointment.service';
 import { AuthService } from '../../../services/auth.service';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { getAuth } from '@angular/fire/auth';
 
 @Component({
-  selector: 'app-appoiment-table',
+  selector: 'app-appointment-table',
   standalone: true,
   imports: [CommonModule, RouterModule, NgxSpinnerModule],
-  templateUrl: './appoiment-table.component.html',
-  styleUrl: './appoiment-table.component.scss',
+  templateUrl: './appointment-table.component.html',
 })
-export class AppoimentTableComponent {
-  appoiments: Appoiment[] = [];
+export class AppointmentTableComponent {
+  appointments: Appointment[] = [];
   currentUserRole: string = '';
   users: UserInterface[] = [];
 
@@ -25,7 +24,7 @@ export class AppoimentTableComponent {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private appoimentService: AppoimentService,
+    private appointmentService: AppointmentService,
 
     private spinner: NgxSpinnerService
   ) {}
@@ -38,8 +37,8 @@ export class AppoimentTableComponent {
     });
     const currentUserEmail = getAuth().currentUser?.email;
     const role = this.authService.getRole();
-    this.appoimentService.getAppoiments().subscribe((response) => {
-      this.appoiments = response
+    this.appointmentService.getAppointments().subscribe((response) => {
+      this.appointments = response
         .filter((item) => {
           if (!currentUserEmail || role === 'ADMIN') return true;
           return (
@@ -48,10 +47,10 @@ export class AppoimentTableComponent {
           );
         })
         .sort((a, b) => {
-          if ((a as Appoiment).status < (b as Appoiment).status) {
+          if ((a as Appointment).status < (b as Appointment).status) {
             return -1;
           }
-          if ((a as Appoiment).status > (b as Appoiment).status) {
+          if ((a as Appointment).status > (b as Appointment).status) {
             return 1;
           }
           return 0;
@@ -60,8 +59,9 @@ export class AppoimentTableComponent {
     });
   }
 
-  handleClick(id: string) {
-    const itemSelected: Appoiment = this.appoiments.filter(
+  handleClick(id: string | undefined) {
+    if (!id) return;
+    const itemSelected: Appointment = this.appointments.filter(
       (item) => item.id === id
     )[0];
     this.itemSelected.emit(itemSelected);

@@ -231,19 +231,19 @@
           </option>
         </select>
         <p>No encuentra su especialidad? Ingrese una nueva</p>
-        <div class="speciality-input">
+        <div class="specialty-input">
           <input
             autocomplete="false"
             type="text"
-            name="otherSpeciality"
+            name="otherSpecialty"
             placeholder="Otra Especialidad"
-            formControlName="otherSpeciality"
+            formControlName="otherSpecialty"
           />
           <button class="addBtn" type="button" (click)="addOtherSpecialty()">
             Agregar
           </button>
         </div>
-        <p *ngIf="form.get('otherSpeciality')?.invalid" class="error-msg">
+        <p *ngIf="form.get('otherSpecialty')?.invalid" class="error-msg">
           Tiene que ingresar una especialidad válida. No puede tener caracteres
           especiales ni números.
         </p>

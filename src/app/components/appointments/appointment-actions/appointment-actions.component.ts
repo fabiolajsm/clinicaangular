@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { RouterModule } from '@angular/router';
-import { Appoiment, Status } from '../../../interfaces/appoiment.interface';
+import { Appointment, Status } from '../../../interfaces/appointment.interface';
 import { AuthService } from '../../../services/auth.service';
 import {
   FormControl,
@@ -11,19 +11,19 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { AppoimentService } from '../../../services/appoiment.service';
+import { AppointmentService } from '../../../services/appointment.service';
 
 @Component({
-  selector: 'app-appoiment-actions',
+  selector: 'app-appointment-actions',
   standalone: true,
   imports: [CommonModule, RouterModule, NgxSpinnerModule, ReactiveFormsModule],
-  templateUrl: './appoiment-actions.component.html',
-  styleUrl: './appoiment-actions.component.scss',
+  templateUrl: './appointment-actions.component.html',
+  styleUrl: './appointment-actions.component.scss',
 })
-export class AppoimentActionsComponent {
+export class AppointmentActionsComponent {
   form: FormGroup;
 
-  @Input() itemSelected: Appoiment | undefined;
+  @Input() itemSelected: Appointment | undefined;
   hasToShowCancelAction: boolean = false;
   hasToShowAcceptAction: boolean = false;
   hasToShowDeclineAction: boolean = false;
@@ -36,7 +36,7 @@ export class AppoimentActionsComponent {
   constructor(
     private spinner: NgxSpinnerService,
     private authService: AuthService,
-    private appoimentService: AppoimentService
+    private appointmentService: AppointmentService
   ) {
     this.form = this.createForm();
   }
@@ -149,22 +149,25 @@ export class AppoimentActionsComponent {
     if (this.form.valid && this.itemSelected?.id && this.action) {
       this.spinner.show();
       this.itemSelected.status = this.action;
-      this.appoimentService.updateAppoimentStatus(
+      this.appointmentService.updateAppointmentStatus(
         this.itemSelected.id,
         this.action
       );
       if (comment) {
-        this.appoimentService.updateComment(this.itemSelected.id, comment);
+        this.appointmentService.updateComment(this.itemSelected.id, comment);
       }
       if (diagnosis) {
-        this.appoimentService.updateDiagnosis(this.itemSelected.id, diagnosis);
+        this.appointmentService.updateDiagnosis(
+          this.itemSelected.id,
+          diagnosis
+        );
       }
-      this.appoimentService.getAppoiments().subscribe((response) => {
-        const appoiment: Appoiment = response.filter(
+      this.appointmentService.getAppointments().subscribe((response) => {
+        const appointment: Appointment = response.filter(
           (item) => item.id == this.itemSelected?.id
         )[0];
-        if (appoiment) {
-          this.itemSelected = appoiment;
+        if (appointment) {
+          this.itemSelected = appointment;
           this.handleActionsVisibility();
         }
         this.spinner.hide();

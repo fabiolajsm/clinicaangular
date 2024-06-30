@@ -44,10 +44,18 @@ export const routes: Routes = [
     canMatch: [authGuard],
   },
   {
-    path: 'appoiment',
+    path: 'appointment',
     loadComponent: () =>
-      import('./components/appoiments/appoiment/appoiment.component').then(
-        (c) => c.AppoimentComponent
+      import(
+        './components/appointments/appointment/appointment.component'
+      ).then((c) => c.AppointmentComponent),
+    canMatch: [authGuard],
+  },
+  {
+    path: 'createAppointment',
+    loadComponent: () =>
+      import('./components/appointments/create/create.component').then(
+        (c) => c.CreateComponent
       ),
     canMatch: [authGuard],
   },

@@ -15,7 +15,9 @@
 ></button>
 
 <h1>Turnos</h1>
-<table class="table table-bordered" *ngIf="appoiments && appoiments.length > 0">
+<p *ngIf="!appointments.length">Todavía no hay turnos</p>
+
+<table class="table table-bordered" *ngIf="appointments && appointments.length > 0">
   <thead>
     <tr>
       <th scope="col"></th>
@@ -43,7 +45,7 @@
       <th scope="col">Estado</th>
     </tr>
   </thead>
-  <tbody *ngFor="let item of appoiments">
+  <tbody *ngFor="let item of appointments">
     <tr>
       <th scope="row">
         <input
@@ -51,13 +53,13 @@
           type="radio"
           name="flexRadioDefault"
           id="flexRadioDefault1"
-          (click)="handleClick(item.id)"
+          (click)="handleClick(item?.id)"
         />
       </th>
       <td>{{ item.day }}</td>
-      <td>{{ item.time }}</td>
+      <td>{{ item.start_time }}</td>
       <td>
-        {{ item.speciality }}
+        {{ item.specialty }}
       </td>
       <td
         *ngIf="
@@ -79,4 +81,3 @@
     </tr>
   </tbody>
 </table>
-<p *ngIf="!appoiments">No hay turnos</p>

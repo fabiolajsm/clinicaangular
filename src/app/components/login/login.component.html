@@ -60,7 +60,7 @@
     </form>
 
     <h2 class="quickAccessText">Acceso rápido</h2>
-    <div class="quickAccessButtonsContainer" *ngIf="users && users.length > 0">
+    <div class="roundedButtons" *ngIf="users && users.length > 0">
       <div *ngFor="let user of users">
         <button type="button" (click)="handleLogin(user.email)">
           <img [src]="user.profilePicture" alt="Foto de perfil" />

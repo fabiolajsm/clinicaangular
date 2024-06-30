@@ -2,24 +2,25 @@ import { Injectable, inject } from '@angular/core';
 import {
   CollectionReference,
   Firestore,
+  QueryConstraint,
   collection,
   collectionData,
   doc,
-  getDoc,
   query,
   updateDoc,
+  where,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { Appoiment } from '../interfaces/appoiment.interface';
+import { Appointment } from '../interfaces/appointment.interface';
 
 @Injectable({
   providedIn: 'root',
 })
-export class AppoimentService {
+export class AppointmentService {
   firestore = inject(Firestore);
-  collectionName = 'appoiments';
+  collectionName = 'appointments';
 
-  getAppoiments(): Observable<Appoiment[]> {
+  getAppointments(): Observable<Appointment[]> {
     const appRef: CollectionReference = collection(
       this.firestore,
       this.collectionName
@@ -27,9 +28,26 @@ export class AppoimentService {
     const appQuery = query(appRef);
     return collectionData(appQuery, {
       idField: 'id',
-    }) as Observable<Appoiment[]>;
+    }) as Observable<Appointment[]>;
   }
-  updateAppoimentStatus(appId: string, status: string) {
+
+  getAppointmentsBySpecialist(id: string): Observable<Appointment[]> {
+    const appRef: CollectionReference = collection(
+      this.firestore,
+      this.collectionName
+    );
+    const specialtyConstraint: QueryConstraint = where(
+      'professional_id',
+      '==',
+      id
+    );
+    const appQuery = query(appRef, specialtyConstraint);
+    return collectionData(appQuery, {
+      idField: 'id',
+    }) as Observable<Appointment[]>;
+  }
+
+  updateAppointmentStatus(appId: string, status: string) {
     const appRef = doc(this.firestore, this.collectionName, appId);
     updateDoc(appRef, {
       status: status,

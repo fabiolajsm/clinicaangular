@@ -7,10 +7,10 @@ import {
   Specialists,
   UserInterface,
 } from '../../interfaces/user.interface';
-import { SpecialitiesService } from '../../services/specialities.service';
+import { SpecialtiesService } from '../../services/specialties.service';
 import { Router } from '@angular/router';
 import { getAuth } from 'firebase/auth';
-import { Schedules } from '../../interfaces/specialities.interface';
+import { Schedules } from '../../interfaces/specialties.interface';
 import {
   AbstractControl,
   FormControl,
@@ -34,7 +34,7 @@ export class MyProfileComponent {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private specialitiesService: SpecialitiesService,
+    private specialtiesService: SpecialtiesService,
     private spinner: NgxSpinnerService
   ) {
     this.form = this.createForm();
@@ -45,7 +45,7 @@ export class MyProfileComponent {
     this.authService.getUserByEmail(this.email).subscribe((currentUserData) => {
       this.user = currentUserData;
       if (this.user?.role === 'ESPECIALISTA') {
-        this.specialitiesService
+        this.specialtiesService
           .getSchedules()
           .subscribe((data: Schedules[]) => {
             this.schedules = data.filter(
@@ -99,7 +99,7 @@ export class MyProfileComponent {
     const end = this.form.get('end')?.value;
     if (this.form.valid && start && end && this.user?.id) {
       this.spinner.show();
-      this.specialitiesService.insertOrUpdateSchedule(
+      this.specialtiesService.insertOrUpdateSchedule(
         this.user?.id,
         start,
         end,

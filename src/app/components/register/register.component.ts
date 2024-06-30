@@ -21,8 +21,8 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import Swal from 'sweetalert2';
 import { getAuth, sendEmailVerification } from 'firebase/auth';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
-import { Specialities } from '../../interfaces/specialities.interface';
-import { SpecialitiesService } from '../../services/specialities.service';
+import { Specialties } from '../../interfaces/specialties.interface';
+import { SpecialtiesService } from '../../services/specialties.service';
 import { HealthInsuranceService } from '../../services/health-insurance.service';
 import { HealthInsurance } from '../../interfaces/healthInsurance.interface';
 import { RecaptchaModule } from 'ng-recaptcha';
@@ -44,7 +44,7 @@ import { RecaptchaModule } from 'ng-recaptcha';
 export class RegisterComponent {
   formSelected: Role | null = null;
   form: FormGroup;
-  specialtiesOptions: Specialities[] = [];
+  specialtiesOptions: Specialties[] = [];
   specialtiesSelected: string[] = [];
   healthInsuranceOptions: HealthInsurance[] = [];
   imagesAux: File[] = [];
@@ -58,7 +58,7 @@ export class RegisterComponent {
     private router: Router,
     private storage: Storage,
     private authService: AuthService,
-    private specialitiesService: SpecialitiesService,
+    private specialtiesService: SpecialtiesService,
     private healthInsuranceService: HealthInsuranceService,
     private spinner: NgxSpinnerService
   ) {
@@ -68,9 +68,9 @@ export class RegisterComponent {
   ngOnInit() {
     this.spinner.show();
     this.isAdmin = this.authService.getIsRole('ADMIN');
-    this.specialitiesService
-      .getSpecialities()
-      .subscribe((data: Specialities[]) => {
+    this.specialtiesService
+      .getSpecialties()
+      .subscribe((data: Specialties[]) => {
         this.specialtiesOptions = data;
       });
     this.healthInsuranceService
@@ -114,7 +114,7 @@ export class RegisterComponent {
         null,
         this.formSelected === 'ESPECIALISTA' ? Validators.required : null
       ),
-      otherSpeciality: new FormControl(''),
+      otherSpecialty: new FormControl(''),
       images: new FormControl(null),
     });
   }
@@ -148,7 +148,7 @@ export class RegisterComponent {
   }
 
   addOtherSpecialty() {
-    const otherSpecialtyControl = this.form.get('otherSpeciality');
+    const otherSpecialtyControl = this.form.get('otherSpecialty');
     const otherSpecialty = otherSpecialtyControl?.value?.trim();
     if (!otherSpecialty || otherSpecialty === '') return;
 
@@ -339,7 +339,7 @@ export class RegisterComponent {
           option.name.toLocaleLowerCase() === specialtyName.toLocaleLowerCase()
       );
       if (!exists) {
-        this.specialitiesService.addSpeciality(specialtyName);
+        this.specialtiesService.addSpecialty(specialtyName);
       }
     }
   }

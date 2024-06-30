@@ -47,7 +47,6 @@ export class LoginComponent {
     'paciente2NoVerificoEmail@gmail.com',
     'paciente3@noverifico.com',
   ];
-  role: string = '';
 
   constructor(
     private router: Router,
@@ -89,51 +88,57 @@ export class LoginComponent {
     const email = this.form.get('email')?.value;
     const password = this.form.get('password')?.value;
 
-    this.authService.login(email, password, this.role as Role).subscribe({
-      next: () => {
-        const currentUserAuth = getAuth()?.currentUser;
-        if (currentUserAuth && !currentUserAuth.emailVerified) {
-          this.showAlert(
-            'Por favor verifica tu dirección de correo electrónico.'
-          );
+    this.authService.getUserByEmail(email).subscribe(
+      (currentUserData) => {
+        if (!currentUserData) {
+          this.showAlert('Usuario no encontrado');
           this.spinner.hide();
           return;
-        } else {
-          this.authService.getUserByEmail(email).subscribe(
-            (currentUserData) => {
-              if (currentUserData && currentUserData.role === 'ESPECIALISTA') {
-                if (!(currentUserData as Specialists).profileEnabled) {
-                  this.showAlert(
-                    'No puedes ingresar, un administrador debe aprobar tu perfil.'
-                  );
-                  this.spinner.hide();
-                  return;
-                }
-              }
-
-              this.authService.addToLoginHistory(email);
-              this.router.navigateByUrl('');
-              this.spinner.hide();
-            },
-            (error) => {
-              console.error('Error al obtener información del usuario:', error);
-              this.spinner.hide();
-            }
-          );
         }
-      },
-      error: (err: FirebaseError) => {
-        let errorMessage = 'Se produjo un error desconocido.';
-        for (const error of authErrors) {
-          if (error.code === err.code) {
-            errorMessage = error.message;
-            break;
+        if (currentUserData && currentUserData.role === 'ESPECIALISTA') {
+          if (!(currentUserData as Specialists).profileEnabled) {
+            this.showAlert(
+              'No puedes ingresar, un administrador debe aprobar tu perfil.'
+            );
+            this.spinner.hide();
+            return;
           }
         }
-        this.errorMessage = errorMessage;
-        this.spinner.hide();
+        this.authService
+          .login(email, password, currentUserData.role as Role)
+          .subscribe({
+            next: () => {
+              const currentUserAuth = getAuth()?.currentUser;
+              if (currentUserAuth && !currentUserAuth.emailVerified) {
+                this.showAlert(
+                  'Por favor verifica tu dirección de correo electrónico.'
+                );
+                this.spinner.hide();
+                return;
+              } else {
+                this.authService.addToLoginHistory(email);
+                this.router.navigateByUrl('');
+                this.spinner.hide();
+              }
+            },
+            error: (err: FirebaseError) => {
+              let errorMessage = 'Se produjo un error desconocido.';
+              for (const error of authErrors) {
+                if (error.code === err.code) {
+                  errorMessage = error.message;
+                  break;
+                }
+              }
+              this.errorMessage = errorMessage;
+              this.spinner.hide();
+            },
+          });
       },
-    });
+      (error) => {
+        console.error('Error al obtener información del usuario:', error);
+        this.spinner.hide();
+      }
+    );
   }
 
   private showAlert(message: string) {
@@ -155,7 +160,6 @@ export class LoginComponent {
     )[0];
     this.form.controls['email'].setValue(userSelected.email);
     this.form.controls['password'].setValue(userSelected.password);
-    this.role = userSelected.role;
     this.spinner.hide();
   }
 

@@ -13,8 +13,11 @@ import { NavbarComponent } from '../navbar/navbar.component';
 })
 export class HomeComponent {
   isLogged: boolean = false;
+  isPatient: boolean = false;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private router: Router, private authService: AuthService) {
+    this.isPatient = this.authService.getIsRole('PACIENTE');
+  }
 
   ngOnInit(): void {
     this.authService.isAuthenticated().subscribe((isAuthenticated) => {
@@ -29,7 +32,7 @@ export class HomeComponent {
     this.router.navigate(['/register']);
   }
   goToAppointments(): void {
-    this.router.navigate(['/appoiment']);
+    this.router.navigate([this.isPatient ? '/createAppointment' : '/appointment']);
   }
   getTitle(): string {
     const role = this.authService.getRole();
@@ -51,16 +54,16 @@ export class HomeComponent {
         return 'Reciba atención médica de calidad desde la comodidad de su hogar.';
     }
   }
-  getGoToAppoimentsText(): string {
+  getGoToAppointmentsText(): string {
     const role = this.authService.getRole();
     switch (role) {
       case 'ADMIN':
       case 'ESPECIALISTA':
         return 'Ir a turnos';
       case 'PACIENTE':
-        return 'Ir a turnos';
+        return 'Agendar un turno';
       default:
-        return '';
+        return 'Turnos';
     }
   }
 }

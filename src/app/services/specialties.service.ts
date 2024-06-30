@@ -12,33 +12,33 @@ import {
   doc,
   updateDoc,
 } from '@angular/fire/firestore';
-import { Schedules, Specialities } from '../interfaces/specialities.interface';
+import { Schedules, Specialties } from '../interfaces/specialties.interface';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SpecialitiesService {
+export class SpecialtiesService {
   firestore = inject(Firestore);
-  collectionName = 'specialities';
+  collectionName = 'specialities'; // change name
   schedulesCollectionName = 'schedules';
 
-  getSpecialities(): Observable<Specialities[]> {
-    const specialitiesRef: CollectionReference = collection(
+  getSpecialties(): Observable<Specialties[]> {
+    const specialtiesRef: CollectionReference = collection(
       this.firestore,
       this.collectionName
     );
-    const specialitiesQuery = query(specialitiesRef);
-    return collectionData(specialitiesQuery, { idField: 'id' }) as Observable<
-      Specialities[]
+    const specialtiesQuery = query(specialtiesRef);
+    return collectionData(specialtiesQuery, { idField: 'id' }) as Observable<
+      Specialties[]
     >;
   }
 
-  addSpeciality(newSpecialityName: string) {
-    const specialitiesRef: CollectionReference = collection(
+  addSpecialty(newSpecialtyName: string) {
+    const specialtiesRef: CollectionReference = collection(
       this.firestore,
       this.collectionName
     );
-    addDoc(specialitiesRef, { name: newSpecialityName });
+    addDoc(specialtiesRef, { name: newSpecialtyName });
   }
 
   getSchedules(): Observable<Schedules[]> {

@@ -1,6 +1,7 @@
-export interface Specialities {
+export interface Specialties {
   id: string;
   name: string;
+  img: string | undefined;
 }
 
 export interface Schedules {
@@ -9,3 +10,5 @@ export interface Schedules {
   start_time: string;
   end_time: string;
 }
+
+export type ScheduleTime = { startTime: string; endTime: string };
