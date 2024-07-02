@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import {
   Appointment,
   AppointmentActions,
+  Appointment_Extra_Info,
   PatientHistory,
   Status,
 } from '../../../interfaces/appointment.interface';
@@ -164,20 +165,24 @@ export class AppointmentActionsComponent {
           if (this.itemSelected.id) {
             this.appointmentService
               .getExtraInfoByAppointmentId(this.itemSelected.id)
-              .subscribe((extraInfo) => {
+              .subscribe((extraInfo: Appointment_Extra_Info[]) => {
+                const hasDiagnosisAndComment = extraInfo.find(
+                  (item) => item.diagnosis && item.comment
+                );
+                const hasPoints = extraInfo.some((item) => item.points);
+                const hasQuality = extraInfo.some((item) => item.quality);
+
                 this.hasToShowProfessionalReview =
-                  extraInfo?.diagnosis &&
-                  extraInfo?.comment &&
-                  status === 'REALIZADO'
+                  hasDiagnosisAndComment && status === 'REALIZADO'
                     ? true
                     : false; // si el profesional cargo comentario y diagnosis
                 if (this.hasToShowProfessionalReview) {
-                  this.reviewComment = `Comentario: ${extraInfo?.comment}. Diagnostico: ${extraInfo?.diagnosis}`;
+                  this.reviewComment = `Comentario: ${hasDiagnosisAndComment?.comment}. Diagnostico: ${hasDiagnosisAndComment?.diagnosis}`;
                 }
                 this.hasToShowRateProfessional =
-                  !extraInfo?.points && status === 'REALIZADO' ? true : false; // si no califico la atencion del especialista
+                  !hasPoints && status === 'REALIZADO' ? true : false; // si no califico la atencion del especialista
                 this.hasToShowQuestionnaire =
-                  !extraInfo?.quality && status === 'REALIZADO' ? true : false; // si no hizo el cuestionario
+                  !hasQuality && status === 'REALIZADO' ? true : false; // si no hizo el cuestionario
               });
           }
           break;
@@ -191,10 +196,13 @@ export class AppointmentActionsComponent {
             this.appointmentService
               .getExtraInfoByAppointmentId(this.itemSelected.id)
               .subscribe((extraInfo) => {
+                const hasPointsAndComment = extraInfo.find(
+                  (item) => item.points && item.comment
+                );
                 this.hasToShowPatientReview =
-                  extraInfo?.points && status === 'REALIZADO' ? true : false; // si el paciente lo califico
+                  hasPointsAndComment && status === 'REALIZADO' ? true : false; // si el paciente lo califico
                 if (this.hasToShowPatientReview) {
-                  this.reviewComment = `Comentario: ${extraInfo?.comment}. Puntaje: ${extraInfo?.points}`;
+                  this.reviewComment = `Comentario: ${hasPointsAndComment?.comment}. Puntaje: ${hasPointsAndComment?.points}`;
                 }
               });
           }

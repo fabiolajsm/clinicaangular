@@ -70,18 +70,20 @@ export class AppointmentService {
 
   getExtraInfoByAppointmentId(
     appointmentId: string
-  ): Observable<Appointment_Extra_Info | undefined> {
+  ): Observable<Appointment_Extra_Info[]> {
     const usersRef = collection(this.firestore, 'appointments_extra_info');
     const q = query(usersRef, where('id', '==', appointmentId));
 
-    return new Observable<Appointment_Extra_Info | undefined>((observer) => {
+    return new Observable<Appointment_Extra_Info[]>((observer) => {
       getDocs(q)
         .then((querySnapshot) => {
+          const appointments: Appointment_Extra_Info[] = [];
           querySnapshot.forEach((doc) => {
             const data = doc.data() as Appointment_Extra_Info;
             const appointmentData = { ...data, id: doc.id };
-            observer.next(appointmentData);
+            appointments.push(appointmentData);
           });
+          observer.next(appointments);
           observer.complete();
         })
         .catch((error) => {
@@ -89,6 +91,7 @@ export class AppointmentService {
         });
     });
   }
+
   createExtraInfo(data: any) {
     const appRef: CollectionReference = collection(
       this.firestore,
