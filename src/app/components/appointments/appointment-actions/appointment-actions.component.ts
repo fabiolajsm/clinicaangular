@@ -44,9 +44,13 @@ export class AppointmentActionsComponent {
   // Visibility flags for specialist
   hasToShowPatientReview: boolean = false;
 
+  reviewComment: string = '';
+
   role: string = '';
   modalTitle: string = '';
   action: AppointmentActions | undefined = undefined;
+
+  hasCreatedAction: boolean = false;
 
   constructor(
     private spinner: NgxSpinnerService,
@@ -105,24 +109,24 @@ export class AppointmentActionsComponent {
       weight: new FormControl('', [
         Validators.required,
         Validators.min(1),
-        Validators.max(1000), // en kg
+        Validators.max(300), // en kg
       ]),
       temperature: new FormControl('', [
         Validators.required,
-        Validators.min(35),
+        Validators.min(28),
         Validators.max(50),
       ]),
       pressure: new FormControl('', [
         Validators.required,
-        Validators.min(60),
-        Validators.max(120),
+        Validators.min(20),
+        Validators.max(300),
       ]),
-      extraA: new FormControl(''),
-      extraB: new FormControl(''),
-      extraC: new FormControl(''),
-      valueA: new FormControl(''),
-      valueB: new FormControl(''),
-      valueC: new FormControl(''),
+      extraA: new FormControl('', []),
+      extraB: new FormControl('', []),
+      extraC: new FormControl('', []),
+      valueA: new FormControl('', []),
+      valueB: new FormControl('', []),
+      valueC: new FormControl('', []),
     });
   }
 
@@ -144,13 +148,15 @@ export class AppointmentActionsComponent {
     this.hasToShowRateProfessional = false;
     this.hasToShowQuestionnaire = false;
     this.hasToShowPatientReview = false;
+    // reset comment:
+    this.reviewComment = '';
   }
 
   handleActionsVisibility() {
+    this.hasCreatedAction = false;
     if (this.itemSelected) {
       const status = this.itemSelected.status;
       this.cleanActions();
-
       switch (this.role) {
         case 'PACIENTE':
           this.hasToShowCancelAction =
@@ -158,11 +164,20 @@ export class AppointmentActionsComponent {
           if (this.itemSelected.id) {
             this.appointmentService
               .getExtraInfoByAppointmentId(this.itemSelected.id)
-              .subscribe((review) => {
+              .subscribe((extraInfo) => {
                 this.hasToShowProfessionalReview =
-                  review?.diagnosis && status === 'REALIZADO' ? true : false; // si el profesional cargo comentario y diagnosis
-                !review?.points && status === 'REALIZADO' ? true : false; // si no califico la atencion del especialista
-                !review?.quality && status === 'REALIZADO' ? true : false; // si no hizo el cuestionario
+                  extraInfo?.diagnosis &&
+                  extraInfo?.comment &&
+                  status === 'REALIZADO'
+                    ? true
+                    : false; // si el profesional cargo comentario y diagnosis
+                if (this.hasToShowProfessionalReview) {
+                  this.reviewComment = `Comentario: ${extraInfo?.comment}. Diagnostico: ${extraInfo?.diagnosis}`;
+                }
+                this.hasToShowRateProfessional =
+                  !extraInfo?.points && status === 'REALIZADO' ? true : false; // si no califico la atencion del especialista
+                this.hasToShowQuestionnaire =
+                  !extraInfo?.quality && status === 'REALIZADO' ? true : false; // si no hizo el cuestionario
               });
           }
           break;
@@ -175,9 +190,12 @@ export class AppointmentActionsComponent {
           if (this.itemSelected.id) {
             this.appointmentService
               .getExtraInfoByAppointmentId(this.itemSelected.id)
-              .subscribe((review) => {
+              .subscribe((extraInfo) => {
                 this.hasToShowPatientReview =
-                  review?.points && status === 'REALIZADO' ? true : false; // si el paciente cargo review
+                  extraInfo?.points && status === 'REALIZADO' ? true : false; // si el paciente lo califico
+                if (this.hasToShowPatientReview) {
+                  this.reviewComment = `Comentario: ${extraInfo?.comment}. Puntaje: ${extraInfo?.points}`;
+                }
               });
           }
           break;
@@ -211,18 +229,25 @@ export class AppointmentActionsComponent {
       case 'COMPLETAR_CUESTIONARIO':
         this.modalTitle = 'Completar cuestionario';
         break;
+      case 'VER_REVIEW_PROFESIONAL':
+        this.modalTitle = 'Ver comentario/diagnostico del profesional';
+        break;
+      case 'VER_REVIEW_PACIENTE':
+        this.modalTitle = 'Ver comentario/calificacion del paciente';
+        break;
       default:
         this.action = undefined;
         break;
     }
   }
 
-  handleCancelAction() {
-    this.form.reset();
-  }
-
   handleSubmit() {
-    if (this.itemSelected?.id && this.action) {
+    if (
+      this.itemSelected?.id &&
+      this.action &&
+      this.action !== 'VER_REVIEW_PROFESIONAL' &&
+      this.action !== 'VER_REVIEW_PACIENTE'
+    ) {
       this.spinner.show();
 
       if (!this.handleValidateAndCreateExtraInfo()) {
@@ -262,6 +287,7 @@ export class AppointmentActionsComponent {
       // Reset the form
       this.form.reset();
       this.formHistoryPatient.reset();
+      this.hasCreatedAction = true;
     }
   }
 
@@ -311,16 +337,19 @@ export class AppointmentActionsComponent {
         } else {
           this.form.get('comment')?.setErrors(null);
           this.form.get('diagnosis')?.setErrors(null);
-          // complete comment
-          this.appointmentService.createExtraInfo({
-            id: this.itemSelected?.id,
-            comment: comment,
-            diagnosis: diagnosis,
-          });
 
           // Create patient history
-          this.createPatientHistory();
-          return true;
+          if (this.createPatientHistory()) {
+            // complete comment
+            this.appointmentService.createExtraInfo({
+              id: this.itemSelected?.id,
+              comment: comment,
+              diagnosis: diagnosis,
+            });
+            return true;
+          } else {
+            return false;
+          }
         }
         break;
       case 'CALIFICAR':
@@ -394,7 +423,8 @@ export class AppointmentActionsComponent {
     return false;
   }
 
-  createPatientHistory() {
+  createPatientHistory(): boolean {
+    this.formHistoryPatient.setErrors(null);
     const height = this.formHistoryPatient.get('height')?.value;
     const weight = this.formHistoryPatient.get('weight')?.value;
     const temperature = this.formHistoryPatient.get('temperature')?.value;
@@ -406,8 +436,29 @@ export class AppointmentActionsComponent {
     const valueB = this.formHistoryPatient.get('valueB')?.value;
     const valueC = this.formHistoryPatient.get('valueC')?.value;
 
+    // Marcar todos los controles como tocados para mostrar los mensajes de error
+    if (this.formHistoryPatient.invalid) {
+      Object.values(this.formHistoryPatient.controls).forEach((control) => {
+        control.markAsTouched();
+      });
+      return false;
+    }
+    if (extraA && !valueA) {
+      this.formHistoryPatient.get('valueA')?.setErrors({ required: true });
+      return false;
+    }
+    if (extraB && !valueB) {
+      this.formHistoryPatient.get('valueB')?.setErrors({ required: true });
+      return false;
+    }
+    if (extraC && !valueC) {
+      this.formHistoryPatient.get('valueC')?.setErrors({ required: true });
+      return false;
+    }
+
+    this.formHistoryPatient.setErrors(null);
     const patientHistory: PatientHistory = {
-      id_patient: this.itemSelected?.id || '',
+      id_patient: this.itemSelected?.patient_id || '',
       height: height,
       weight: weight,
       temperature: temperature,
@@ -422,5 +473,11 @@ export class AppointmentActionsComponent {
 
     // Llamar al servicio para crear el historial del paciente
     this.appointmentService.createPatientHistory(patientHistory);
+    return true;
+  }
+
+  handleCloseModal() {
+    this.form.reset();
+    this.formHistoryPatient.reset();
   }
 }

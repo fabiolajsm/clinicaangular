@@ -26,8 +26,25 @@
             {{ modalTitle }}
           </h1>
         </div>
-        <div class="modal-body" *ngIf="action !== 'ACEPTADO'">
-          <form [formGroup]="form">
+        <div class="modal-body">
+          <p
+            *ngIf="
+              reviewComment.length > 0 &&
+              (action === 'VER_REVIEW_PROFESIONAL' ||
+                action === 'VER_REVIEW_PACIENTE')
+            "
+          >
+            {{ reviewComment }}
+          </p>
+
+          <form
+            [formGroup]="form"
+            *ngIf="
+              action !== 'ACEPTADO' &&
+              action !== 'VER_REVIEW_PROFESIONAL' &&
+              action !== 'VER_REVIEW_PACIENTE'
+            "
+          >
             <div class="form-floating">
               <textarea
                 class="form-control"
@@ -215,7 +232,27 @@
                     formHistoryPatient.get('weight')?.touched)
                 "
               >
-                Debe ingresar un peso válido (35-50 kg)
+                Debe ingresar un peso válido (1-300 kg)
+              </p>
+            </div>
+            <div class="form-floating">
+              <input
+                type="number"
+                class="form-control"
+                id="temperature"
+                placeholder="Peso (kg)"
+                formControlName="temperature"
+              />
+              <label for="temperature">Temperatura</label>
+              <p
+                class="error-msg"
+                *ngIf="
+                  formHistoryPatient.get('temperature')?.invalid &&
+                  (formHistoryPatient.get('temperature')?.dirty ||
+                    formHistoryPatient.get('temperature')?.touched)
+                "
+              >
+                Debe ingresar una temperatura válida (28-50)
               </p>
             </div>
             <div class="form-floating">
@@ -235,10 +272,9 @@
                     formHistoryPatient.get('pressure')?.touched)
                 "
               >
-                Debe ingresar una presión arterial válida (60-120 mmHg)
+                Debe ingresar una presión arterial válida (20-300 mmHg)
               </p>
             </div>
-            <!-- Otros campos adicionales -->
             <div class="form-floating">
               <input
                 type="text"
@@ -258,7 +294,14 @@
                 formControlName="valueA"
               />
               <label for="valueA">Valor</label>
+              <p
+                class="error-msg"
+                *ngIf="formHistoryPatient.get('valueA')?.invalid"
+              >
+                Este campo es obligatorio si ingresa Dato adicional.
+              </p>
             </div>
+
             <div class="form-floating">
               <input
                 type="text"
@@ -278,7 +321,14 @@
                 formControlName="valueB"
               />
               <label for="valueB">Valor (2)</label>
+              <p
+                class="error-msg"
+                *ngIf="formHistoryPatient.get('valueB')?.invalid"
+              >
+                Este campo es obligatorio si ingresa Dato adicional 2.
+              </p>
             </div>
+
             <div class="form-floating">
               <input
                 type="text"
@@ -289,7 +339,6 @@
               />
               <label for="extraC">Nombre dato adicional 3</label>
             </div>
-
             <div class="form-floating">
               <input
                 type="text"
@@ -299,6 +348,12 @@
                 formControlName="valueC"
               />
               <label for="valueC">Valor (3)</label>
+              <p
+                class="error-msg"
+                *ngIf="formHistoryPatient.get('valueC')?.invalid"
+              >
+                Este campo es obligatorio si ingresa Dato adicional 3.
+              </p>
             </div>
           </form>
         </div>
@@ -308,11 +363,15 @@
             type="button"
             class="btn btn-secondary"
             data-bs-dismiss="modal"
-            (click)="handleCancelAction()"
+            (click)="handleCloseModal()"
           >
-            Cancelar
+            Cerrar
           </button>
           <button
+            *ngIf="
+              action !== 'VER_REVIEW_PROFESIONAL' &&
+              action !== 'VER_REVIEW_PACIENTE'
+            "
             type="button"
             data-bs-dismiss="modal"
             class="btn btn-primary"
