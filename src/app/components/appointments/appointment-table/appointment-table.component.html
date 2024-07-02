@@ -14,7 +14,7 @@
   (click)="handleBack()"
 ></button>
 
-<h1>Turnos</h1>
+<h1>{{ currentUserRole === "ADMIN" ? "Turnos" : "Mis turnos" }}</h1>
 <p *ngIf="!appointments.length">Todavía no hay turnos</p>
 
 <table

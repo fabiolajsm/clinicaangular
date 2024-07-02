@@ -32,30 +32,33 @@ export class AppointmentTableComponent {
   ngOnInit(): void {
     this.spinner.show();
     this.currentUserRole = this.authService.getRole();
+    const currentUserEmail = getAuth().currentUser?.email;
+
     this.authService.getUsers().subscribe((response) => {
       this.users = response;
-    });
-    const currentUserEmail = getAuth().currentUser?.email;
-    const role = this.authService.getRole();
-    this.appointmentService.getAppointments().subscribe((response) => {
-      this.appointments = response
-        // .filter((item) => { TODO
-        //   if (!currentUserEmail || role === 'ADMIN') return true;
-        //   return (
-        //     item.professional === currentUserEmail ||
-        //     item.patient == currentUserEmail
-        //   );
-        // })
-        .sort((a, b) => {
-          if ((a as Appointment).status < (b as Appointment).status) {
-            return -1;
-          }
-          if ((a as Appointment).status > (b as Appointment).status) {
-            return 1;
-          }
-          return 0;
-        });
-      this.spinner.hide();
+      const currentUser = this.users.find(
+        (item) => item.email === currentUserEmail
+      );
+      this.appointmentService.getAppointments().subscribe((response) => {
+        this.appointments = response
+          .filter((item) => {
+            if (!currentUserEmail || currentUser?.role === 'ADMIN') return true;
+            return (
+              item.patient_id === currentUser?.id ||
+              item.professional_id == currentUser?.id
+            );
+          })
+          .sort((a, b) => {
+            if ((a as Appointment).status < (b as Appointment).status) {
+              return -1;
+            }
+            if ((a as Appointment).status > (b as Appointment).status) {
+              return 1;
+            }
+            return 0;
+          });
+        this.spinner.hide();
+      });
     });
   }
 

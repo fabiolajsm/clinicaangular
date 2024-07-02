@@ -4,7 +4,8 @@
   color="#edf2f4"
   type="ball-scale-multiple"
   [fullScreen]="true"
-  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+>
+  <p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
 </ngx-spinner>
 
 <ng-container *ngIf="itemSelected">
@@ -35,41 +36,273 @@
                 style="height: 100px"
                 formControlName="comment"
               ></textarea>
-              <label for="comment">{{
-                action !== "REALIZADO" ? "Comentario" : "Comentario/reseña"
-              }}</label>
+              <label for="comment">Comentario</label>
             </div>
             <p
+              class="error-msg"
               *ngIf="
                 form.get('comment')?.invalid &&
                 (form.get('comment')?.dirty || form.get('comment')?.touched)
               "
-              class="error-msg"
             >
-              Tiene que ingresar un comentario (hasta 300 caracteres)
+              Debe ingresar un comentario (hasta 300 caracteres)
             </p>
-            <br />
             <div class="form-floating" *ngIf="action === 'REALIZADO'">
               <textarea
                 class="form-control"
-                placeholder="Ingresar comentario"
+                placeholder="Ingresar diagnóstico"
                 id="diagnosis"
                 style="height: 100px"
                 formControlName="diagnosis"
               ></textarea>
-              <label for="diagnosis">Diagnostico</label>
+              <label for="diagnosis">Diagnóstico</label>
+              <p
+                class="error-msg"
+                *ngIf="
+                  form.get('diagnosis')?.invalid &&
+                  (form.get('diagnosis')?.dirty ||
+                    form.get('diagnosis')?.touched)
+                "
+              >
+                Debe ingresar un diagnóstico (hasta 300 caracteres)
+              </p>
             </div>
-            <p
-              *ngIf="
-                form.get('diagnosis')?.invalid &&
-                (form.get('diagnosis')?.dirty || form.get('diagnosis')?.touched)
-              "
-              class="error-msg"
-            >
-              Tiene que ingresar un diagnóstico (hasta 300 caracteres)
-            </p>
+            <div *ngIf="action === 'CALIFICAR'">
+              <div class="form-floating">
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="Ingresar puntos (1-10)"
+                  id="points"
+                  formControlName="points"
+                />
+                <label for="points">Puntos (1-10)</label>
+                <p
+                  class="error-msg"
+                  *ngIf="
+                    form.get('points')?.invalid &&
+                    (form.get('points')?.dirty || form.get('points')?.touched)
+                  "
+                >
+                  Debe ingresar puntos válidos (1-10)
+                </p>
+              </div>
+            </div>
+            <div *ngIf="action === 'COMPLETAR_CUESTIONARIO'">
+              <div class="form-floating">
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="Calidad del servicio (1-10)"
+                  id="quality"
+                  formControlName="quality"
+                />
+                <label for="quality">Calidad del servicio (1-10)</label>
+                <p
+                  class="error-msg"
+                  *ngIf="
+                    form.get('quality')?.invalid &&
+                    (form.get('quality')?.dirty || form.get('quality')?.touched)
+                  "
+                >
+                  Debe ingresar un valor válido (1-10)
+                </p>
+              </div>
+              <div class="form-floating">
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="Instalaciones y condiciones (1-10)"
+                  id="facilitiesAndConditions"
+                  formControlName="facilitiesAndConditions"
+                />
+                <label for="facilitiesAndConditions"
+                  >Instalaciones y condiciones (1-10)</label
+                >
+                <p
+                  class="error-msg"
+                  *ngIf="
+                    form.get('facilitiesAndConditions')?.invalid &&
+                    (form.get('facilitiesAndConditions')?.dirty ||
+                      form.get('facilitiesAndConditions')?.touched)
+                  "
+                >
+                  Debe ingresar un valor válido (1-10)
+                </p>
+              </div>
+              <div class="form-floating">
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="Tiempo de espera (1-10)"
+                  id="waitTime"
+                  formControlName="waitTime"
+                />
+                <label for="waitTime">Tiempo de espera (1-10)</label>
+                <p
+                  class="error-msg"
+                  *ngIf="
+                    form.get('waitTime')?.invalid &&
+                    (form.get('waitTime')?.dirty ||
+                      form.get('waitTime')?.touched)
+                  "
+                >
+                  Debe ingresar un valor válido (1-10)
+                </p>
+              </div>
+              <div class="form-floating">
+                <input
+                  type="number"
+                  class="form-control"
+                  placeholder="Seguridad y privacidad (1-10)"
+                  id="securityAndPrivacy"
+                  formControlName="securityAndPrivacy"
+                />
+                <label for="securityAndPrivacy"
+                  >Seguridad y privacidad (1-10)</label
+                >
+                <p
+                  class="error-msg"
+                  *ngIf="
+                    form.get('securityAndPrivacy')?.invalid &&
+                    (form.get('securityAndPrivacy')?.dirty ||
+                      form.get('securityAndPrivacy')?.touched)
+                  "
+                >
+                  Debe ingresar un valor válido (1-10)
+                </p>
+              </div>
+            </div>
           </form>
         </div>
+        <!-- Formulario de Historial del Paciente -->
+        <div class="modal-body" *ngIf="action === 'REALIZADO'">
+          <form [formGroup]="formHistoryPatient">
+            <div class="form-floating">
+              <input
+                type="number"
+                class="form-control"
+                id="height"
+                placeholder="Altura (cm)"
+                formControlName="height"
+              />
+              <label for="height">Altura (cm)</label>
+              <p
+                class="error-msg"
+                *ngIf="
+                  formHistoryPatient.get('height')?.invalid &&
+                  (formHistoryPatient.get('height')?.dirty ||
+                    formHistoryPatient.get('height')?.touched)
+                "
+              >
+                Debe ingresar una altura válida (1-250 cm)
+              </p>
+            </div>
+            <div class="form-floating">
+              <input
+                type="number"
+                class="form-control"
+                id="weight"
+                placeholder="Peso (kg)"
+                formControlName="weight"
+              />
+              <label for="weight">Peso (kg)</label>
+              <p
+                class="error-msg"
+                *ngIf="
+                  formHistoryPatient.get('weight')?.invalid &&
+                  (formHistoryPatient.get('weight')?.dirty ||
+                    formHistoryPatient.get('weight')?.touched)
+                "
+              >
+                Debe ingresar un peso válido (35-50 kg)
+              </p>
+            </div>
+            <div class="form-floating">
+              <input
+                type="number"
+                class="form-control"
+                id="pressure"
+                placeholder="Presión arterial (mmHg)"
+                formControlName="pressure"
+              />
+              <label for="pressure">Presión arterial (mmHg)</label>
+              <p
+                class="error-msg"
+                *ngIf="
+                  formHistoryPatient.get('pressure')?.invalid &&
+                  (formHistoryPatient.get('pressure')?.dirty ||
+                    formHistoryPatient.get('pressure')?.touched)
+                "
+              >
+                Debe ingresar una presión arterial válida (60-120 mmHg)
+              </p>
+            </div>
+            <!-- Otros campos adicionales -->
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control"
+                id="extraA"
+                placeholder="Extra A"
+                formControlName="extraA"
+              />
+              <label for="extraA">Nombre dato adicional 1</label>
+            </div>
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control"
+                id="valueA"
+                placeholder="Valor A"
+                formControlName="valueA"
+              />
+              <label for="valueA">Valor</label>
+            </div>
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control"
+                id="extraB"
+                placeholder="Extra B"
+                formControlName="extraB"
+              />
+              <label for="extraB">Nombre dato adicional 2</label>
+            </div>
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control"
+                id="valueB"
+                placeholder="Valor B"
+                formControlName="valueB"
+              />
+              <label for="valueB">Valor (2)</label>
+            </div>
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control"
+                id="extraC"
+                placeholder="Extra C"
+                formControlName="extraC"
+              />
+              <label for="extraC">Nombre dato adicional 3</label>
+            </div>
+
+            <div class="form-floating">
+              <input
+                type="text"
+                class="form-control"
+                id="valueC"
+                placeholder="Valor C"
+                formControlName="valueC"
+              />
+              <label for="valueC">Valor (3)</label>
+            </div>
+          </form>
+        </div>
+        <!-- Fin del formulario de Historial del Paciente -->
         <div class="modal-footer">
           <button
             type="button"
@@ -92,7 +325,9 @@
     </div>
   </div>
   <!-- end of modal -->
+
   <div class="buttonsContainer">
+    <!-- Buttons for different actions -->
     <button
       *ngIf="hasToShowCancelAction"
       type="button"
@@ -104,7 +339,7 @@
       Cancelar turno
     </button>
     <button
-      *ngIf="hasToShowCancelAction"
+      *ngIf="hasToShowDeclineAction"
       type="button"
       class="btn btn-outline-danger"
       data-bs-toggle="modal"
@@ -133,5 +368,64 @@
     >
       Finalizar turno
     </button>
+
+    <!-- Buttons for patient actions -->
+    <button
+      *ngIf="hasToShowProfessionalReview"
+      type="button"
+      class="btn btn-outline-success"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('VER_REVIEW_PROFESIONAL')"
+    >
+      Ver diagnóstico y comentario del especialista
+    </button>
+    <button
+      *ngIf="hasToShowQuestionnaire"
+      type="button"
+      class="btn btn-outline-success"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('COMPLETAR_CUESTIONARIO')"
+    >
+      Completar cuestionario
+    </button>
+    <button
+      *ngIf="hasToShowRateProfessional"
+      type="button"
+      class="btn btn-outline-success"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('CALIFICAR')"
+    >
+      Calificar atención del especialista
+    </button>
+
+    <!-- Button for specialist action -->
+    <button
+      *ngIf="hasToShowPatientReview"
+      type="button"
+      class="btn btn-outline-success"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('VER_REVIEW_PACIENTE')"
+    >
+      Ver comentario del paciente
+    </button>
+
+    <p
+      *ngIf="
+        !hasToShowCancelAction &&
+        !hasToShowDeclineAction &&
+        !hasToShowAcceptAction &&
+        !hasToShowFinishAction &&
+        !hasToShowProfessionalReview &&
+        !hasToShowQuestionnaire &&
+        !hasToShowRateProfessional &&
+        !hasToShowPatientReview
+      "
+    >
+      No puede realizar ninguna acción con este turno.
+    </p>
   </div>
 </ng-container>
