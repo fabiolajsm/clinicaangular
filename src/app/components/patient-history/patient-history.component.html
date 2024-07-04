@@ -22,8 +22,9 @@
       </div>
 
       <div class="modal-body">
-        <p *ngIf="!patientData">No tiene un historial clínico</p>
-        <ng-container *ngIf="patientData && patientData.length > 0">
+        <ng-container
+          *ngIf="patientData && patientData.length > 0; else emptyDetail"
+        >
           <div *ngFor="let item of patientData">
             <p>
               Altura: {{ item.height }}. Peso: {{ item.weight }}. Temperatura:
@@ -37,6 +38,9 @@
             <br />
           </div>
         </ng-container>
+        <ng-template #emptyDetail>
+          <p>No tiene historial</p>
+        </ng-template>
       </div>
     </div>
   </div>

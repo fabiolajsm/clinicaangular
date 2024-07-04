@@ -9,19 +9,29 @@ import {
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { AuthService } from '../../../services/auth.service';
 import { RouterModule } from '@angular/router';
+import { PatientHistoryComponent } from '../../patient-history/patient-history.component';
+import { PatientHistory } from '../../../interfaces/appointment.interface';
+import { PatientHistoryService } from '../../../services/patient-history.service';
 
 @Component({
   selector: 'app-user-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxSpinnerModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NgxSpinnerModule,
+    PatientHistoryComponent,
+  ],
   templateUrl: './user-detail.component.html',
   styleUrl: './user-detail.component.scss',
 })
 export class UserDetailComponent {
   @Input() userSelected: UserInterface | Patients | Specialists | undefined;
+  patientData: PatientHistory[] | undefined;
 
   constructor(
     private authService: AuthService,
+    private patientHistoryService: PatientHistoryService,
     private spinner: NgxSpinnerService
   ) {}
 
@@ -41,6 +51,27 @@ export class UserDetailComponent {
       }
     });
     this.spinner.hide();
+  }
+
+  ngOnChanges() {
+    if (
+      this.userSelected &&
+      this.userSelected?.role === 'PACIENTE' &&
+      this.userSelected.id
+    ) {
+      this.patientHistoryService
+        .getPatientHistory(this.userSelected.id)
+        .subscribe(
+          (response: PatientHistory[] | undefined) => {
+            console.log(response, 'response');
+            
+            this.patientData = response;
+          },
+          (error) => {
+            console.error('Error fetching patient history:', error);
+          }
+        );
+    }
   }
 
   getData(role: Role): string {

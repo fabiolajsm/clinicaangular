@@ -28,6 +28,15 @@
       >
         {{ getButtonMessage() }}
       </button>
+      <button
+        *ngIf="userSelected.role === 'PACIENTE'"
+        type="button"
+        class="btn btn-outline-secondary"
+        data-bs-toggle="modal"
+        data-bs-target="#staticBackdrop"
+      >
+        Ver historial clínico
+      </button>
       <img
         class="d-block w-100 image"
         [src]="userSelected.profilePicture"
@@ -36,6 +45,7 @@
     </div>
   </div>
   <!-- End of card -->
+  <app-patient-history [patientData]="patientData" />
 </ng-container>
 
 <ng-template #emptyDetail>
