@@ -7,17 +7,24 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { AuthService } from '../../../services/auth.service';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { getAuth } from '@angular/fire/auth';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-appointment-table',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxSpinnerModule],
+  imports: [CommonModule, RouterModule, NgxSpinnerModule, FormsModule],
   templateUrl: './appointment-table.component.html',
+  styleUrl: './appointment-table.component.scss',
 })
 export class AppointmentTableComponent {
   appointments: Appointment[] = [];
+  filteredAppointments: Appointment[] = [];
   currentUserRole: string = '';
   users: UserInterface[] = [];
+
+  selectedFilterOption: string = ''; // value type (day, time, specialty, etc.)
+  filterValue: string = ''; // value to serach
+  auxItemSelected: Appointment | undefined;
 
   @Output() public itemSelected: EventEmitter<any> = new EventEmitter<any>();
 
@@ -25,7 +32,6 @@ export class AppointmentTableComponent {
     private router: Router,
     private authService: AuthService,
     private appointmentService: AppointmentService,
-
     private spinner: NgxSpinnerService
   ) {}
 
@@ -57,18 +63,86 @@ export class AppointmentTableComponent {
             }
             return 0;
           });
+
+        // at first we show all the appointments without filters
+        this.filteredAppointments = [...this.appointments];
         this.spinner.hide();
       });
     });
   }
 
+  applyFilter() {
+    if (!this.selectedFilterOption || !this.filterValue) {
+      this.filteredAppointments = [...this.appointments];
+      return;
+    }
+
+    this.filterValue = this.filterValue.trim();
+    switch (this.selectedFilterOption) {
+      case 'day':
+        this.filteredAppointments = this.appointments.filter((item) =>
+          item.day.toLowerCase().includes(this.filterValue.toLowerCase())
+        );
+        break;
+      case 'time':
+        this.filteredAppointments = this.appointments.filter((item) =>
+          item.start_time.toLowerCase().includes(this.filterValue.toLowerCase())
+        );
+        break;
+      case 'specialty':
+        this.filteredAppointments = this.appointments.filter((item) =>
+          item.specialty.toLowerCase().includes(this.filterValue.toLowerCase())
+        );
+        break;
+      case 'patient':
+        this.filteredAppointments = this.appointments.filter((item) =>
+          item.patient_name
+            .toLowerCase()
+            .includes(this.filterValue.toLowerCase())
+        );
+        break;
+      case 'professional':
+        this.filteredAppointments = this.appointments.filter((item) =>
+          item.professional_name
+            .toLowerCase()
+            .includes(this.filterValue.toLowerCase())
+        );
+        break;
+      case 'status':
+        this.filteredAppointments = this.appointments.filter((item) =>
+          item.status.toLowerCase().includes(this.filterValue.toLowerCase())
+        );
+        break;
+      default:
+        this.filteredAppointments = [...this.appointments];
+        break;
+    }
+    if (
+      this.auxItemSelected &&
+      !this.filteredAppointments.includes(this.auxItemSelected)
+    ) {
+      this.auxItemSelected = undefined;
+      this.itemSelected.emit(undefined);
+    }
+  }
+
+  cleanFilters() {
+    this.filteredAppointments = [...this.appointments];
+    this.selectedFilterOption = '';
+    this.filterValue = '';
+  }
+
   handleClick(id: string | undefined) {
     if (!id) return;
-    const itemSelected: Appointment = this.appointments.filter(
+    const itemSelected: Appointment | undefined = this.appointments.find(
       (item) => item.id === id
-    )[0];
-    this.itemSelected.emit(itemSelected);
+    );
+    if (itemSelected) {
+      this.auxItemSelected = itemSelected;
+      this.itemSelected.emit(itemSelected);
+    }
   }
+
   handleBack() {
     this.router.navigate(['/']);
   }
