@@ -1,0 +1,43 @@
+<div
+  class="modal fade"
+  id="staticBackdrop"
+  data-bs-backdrop="static"
+  data-bs-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="staticBackdropLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">
+          Historial clínico
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <div class="modal-body">
+        <p *ngIf="!patientData">No tiene un historial clínico</p>
+        <ng-container *ngIf="patientData && patientData.length > 0">
+          <div *ngFor="let item of patientData">
+            <p>
+              Altura: {{ item.height }}. Peso: {{ item.weight }}. Temperatura:
+              {{ item.temperature }}. Presión arterial: {{ item.pressure }}
+              <ng-container *ngIf="item && item.extraData">
+                <span *ngFor="let key of getExtraDataKeys(item.extraData)">
+                  {{ key }}: {{ item.extraData[key] }}
+                </span>
+              </ng-container>
+            </p>
+            <br />
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

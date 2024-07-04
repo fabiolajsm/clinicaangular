@@ -12,11 +12,10 @@ import {
   updateDoc,
   where,
 } from '@angular/fire/firestore';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   Appointment,
   Appointment_Extra_Info,
-  PatientHistory,
 } from '../interfaces/appointment.interface';
 
 @Injectable({
@@ -96,13 +95,6 @@ export class AppointmentService {
     const appRef: CollectionReference = collection(
       this.firestore,
       'appointments_extra_info'
-    );
-    addDoc(appRef, data);
-  }
-  createPatientHistory(data: PatientHistory) {
-    const appRef: CollectionReference = collection(
-      this.firestore,
-      'patient_history'
     );
     addDoc(appRef, data);
   }

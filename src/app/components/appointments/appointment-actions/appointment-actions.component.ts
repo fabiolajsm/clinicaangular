@@ -18,6 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointment.service';
+import { PatientHistoryService } from '../../../services/patient-history.service';
 
 @Component({
   selector: 'app-appointment-actions',
@@ -56,7 +57,8 @@ export class AppointmentActionsComponent {
   constructor(
     private spinner: NgxSpinnerService,
     private authService: AuthService,
-    private appointmentService: AppointmentService
+    private appointmentService: AppointmentService,
+    private patientHistoryService: PatientHistoryService
   ) {
     this.form = this.createForm();
     this.formHistoryPatient = this.createHistoryForm();
@@ -471,16 +473,14 @@ export class AppointmentActionsComponent {
       weight: weight,
       temperature: temperature,
       pressure: pressure,
-      extraA: extraA,
-      extraB: extraB,
-      extraC: extraC,
-      valueA: valueA,
-      valueB: valueB,
-      valueC: valueC,
+      extraData: {
+        ...(extraA ? { [extraA]: valueA } : {}),
+        ...(extraB ? { [extraB]: valueB } : {}),
+        ...(extraC ? { [extraC]: valueC } : {}),
+      },
     };
 
-    // Llamar al servicio para crear el historial del paciente
-    this.appointmentService.createPatientHistory(patientHistory);
+    this.patientHistoryService.createPatientHistory(patientHistory);
     return true;
   }
 

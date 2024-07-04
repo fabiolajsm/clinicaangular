@@ -40,10 +40,5 @@ export interface PatientHistory {
   weight: number;
   temperature: number;
   pressure: number;
-  extraA: string | undefined;
-  extraB: string | undefined;
-  extraC: string | undefined;
-  valueA: string | undefined;
-  valueB: string | undefined;
-  valueC: string | undefined;
+  extraData: { [key: string]: string } | undefined;
 }

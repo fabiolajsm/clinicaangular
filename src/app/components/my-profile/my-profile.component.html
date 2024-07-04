@@ -91,6 +91,30 @@
                 />
               </div>
             </div>
+            <hr />
+            <!-- buttons see patient history -->
+            <div class="row" *ngIf="user.role === 'PACIENTE'">
+              <div class="col-sm-3">
+                <p class="mb-0">Historial clínico</p>
+              </div>
+              <div class="col-sm-9 gap">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#staticBackdrop"
+                >
+                  Ver historial clínico
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="downloadPatientHistory()"
+                >
+                  Descargar historial clínico
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         <!-- End of basic info -->
@@ -186,6 +210,9 @@
       </div>
     </div>
   </ng-container>
+
+  <app-patient-history [patientData]="patientData" />
+
   <ng-template #emptyDetail>
     <p>No hay datos para mostrar</p>
   </ng-template>

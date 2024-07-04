@@ -18,11 +18,20 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { PatientHistoryComponent } from '../patient-history/patient-history.component';
+import { PatientHistoryService } from '../../services/patient-history.service';
+import { PatientHistory } from '../../interfaces/appointment.interface';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-my-profile',
   standalone: true,
-  imports: [CommonModule, NgxSpinnerModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    NgxSpinnerModule,
+    ReactiveFormsModule,
+    PatientHistoryComponent,
+  ],
   templateUrl: './my-profile.component.html',
 })
 export class MyProfileComponent {
@@ -30,12 +39,14 @@ export class MyProfileComponent {
   email: string | null | undefined = null;
   schedules: Schedules | null = null;
   form: FormGroup;
+  patientData: PatientHistory[] | undefined;
 
   constructor(
     private router: Router,
     private authService: AuthService,
     private specialtiesService: SpecialtiesService,
-    private spinner: NgxSpinnerService
+    private spinner: NgxSpinnerService,
+    private patientHistoryService: PatientHistoryService
   ) {
     this.form = this.createForm();
 
@@ -52,6 +63,16 @@ export class MyProfileComponent {
               (item) => item.user_id === this.user?.id
             )[0];
           });
+      }
+      if (this.user?.role === 'PACIENTE' && this.user.id) {
+        this.patientHistoryService.getPatientHistory(this.user.id).subscribe(
+          (response: PatientHistory[] | undefined) => {
+            this.patientData = response;
+          },
+          (error) => {
+            console.error('Error fetching patient history:', error);
+          }
+        );
       }
       this.spinner.hide();
     });
@@ -136,5 +157,14 @@ export class MyProfileComponent {
 
   handleBack() {
     this.router.navigate(['/']);
+  }
+
+  downloadPatientHistory() {
+    if (!this.user?.name || !this.user?.lastname || !this.patientData) return;
+    this.patientHistoryService.downloadPatientHistory(
+      this.user?.name,
+      this.user?.lastname,
+      this.patientData
+    );
   }
 }
