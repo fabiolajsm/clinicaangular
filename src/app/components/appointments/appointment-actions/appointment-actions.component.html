@@ -22,29 +22,16 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="staticBackdropLabel">
-            {{ modalTitle }}
+          <h1 *ngIf="action" class="modal-title fs-5" id="staticBackdropLabel">
+            {{ action | actionModalTitle }}
           </h1>
         </div>
-        <div class="modal-body">
-          <p
-            *ngIf="
-              reviewComment.length > 0 &&
-              (action === 'VER_REVIEW_PROFESIONAL' ||
-                action === 'VER_REVIEW_PACIENTE')
-            "
-          >
-            {{ reviewComment }}
+        <div class="modal-body" *ngIf="action !== 'ACEPTADO'">
+          <p *ngIf="message.length > 0">
+            {{ message }}
           </p>
 
-          <form
-            [formGroup]="form"
-            *ngIf="
-              action !== 'ACEPTADO' &&
-              action !== 'VER_REVIEW_PROFESIONAL' &&
-              action !== 'VER_REVIEW_PACIENTE'
-            "
-          >
+          <form [formGroup]="form" *ngIf="handleShowForm()">
             <div class="form-floating">
               <textarea
                 class="form-control"
@@ -368,10 +355,7 @@
             Cerrar
           </button>
           <button
-            *ngIf="
-              action !== 'VER_REVIEW_PROFESIONAL' &&
-              action !== 'VER_REVIEW_PACIENTE'
-            "
+            *ngIf="handleShowForm()"
             type="button"
             data-bs-dismiss="modal"
             class="btn btn-primary"
@@ -450,6 +434,16 @@
       Completar cuestionario
     </button>
     <button
+      *ngIf="hasToShowAnswersQuestionnaire"
+      type="button"
+      class="btn btn-outline-secondary"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('VER_CUESTIONARIO')"
+    >
+      Ver respuestas al cuestionario
+    </button>
+    <button
       *ngIf="hasToShowRateProfessional"
       type="button"
       class="btn btn-outline-success"
@@ -459,8 +453,28 @@
     >
       Calificar atención del especialista
     </button>
+    <button
+      *ngIf="hasToShowAnswerRateProfessional"
+      type="button"
+      class="btn btn-outline-secondary"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('VER_REVIEW_PROFESIONAL_PACIENTE')"
+    >
+      Ver calificación especialista
+    </button>
 
     <!-- Button for specialist action -->
+    <button
+      *ngIf="hasToShowTheirReviewSpecialist"
+      type="button"
+      class="btn btn-outline-secondary"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('VER_MI_COMENTARIO_DIAGNOSTICO')"
+    >
+      Ver mi comentario/diagnóstico
+    </button>
     <button
       *ngIf="hasToShowPatientReview"
       type="button"
@@ -472,18 +486,7 @@
       Ver comentario del paciente
     </button>
 
-    <p
-      *ngIf="
-        !hasToShowCancelAction &&
-        !hasToShowDeclineAction &&
-        !hasToShowAcceptAction &&
-        !hasToShowFinishAction &&
-        !hasToShowProfessionalReview &&
-        !hasToShowQuestionnaire &&
-        !hasToShowRateProfessional &&
-        !hasToShowPatientReview
-      "
-    >
+    <p *ngIf="!hasToShowAction()">
       No puede realizar ninguna acción con este turno.
     </p>
   </div>

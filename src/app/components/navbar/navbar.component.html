@@ -20,12 +20,12 @@
     </li>
     <li
       class="listOption"
-      *ngIf="isLogged && isAdmin"
-      routerLink="/manageUsers"
+      *ngIf="isLogged && !isAdmin && !isPatient"
+      routerLink="/myPatients"
     >
       <a>
-        <i class="fa fa-users" aria-hidden="true"></i>
-        <p>Usuarios</p>
+        <i class="fa fa-address-book" aria-hidden="true"></i>
+        <p>Pacientes</p>
       </a>
     </li>
     <li class="listOption" *ngIf="isLogged" routerLink="/myProfile">

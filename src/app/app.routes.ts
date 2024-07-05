@@ -60,6 +60,14 @@ export const routes: Routes = [
     canMatch: [authGuard],
   },
   {
+    path: 'myPatients',
+    loadComponent: () =>
+      import('./components/my-patients/my-patients.component').then(
+        (c) => c.MyPatientsComponent
+      ),
+    canMatch: [authGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./components/error/error.component').then(

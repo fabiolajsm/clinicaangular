@@ -1,4 +1,8 @@
 <div class="infoContainer">
   <app-appointment-table (itemSelected)="handleItemSelected($event)" />
   <app-appointment-actions [itemSelected]="itemSelected" />
+  <div class="redirectlink" *ngIf="isAdmin">
+    <p>¿Quieres agregar un turno?</p>
+    <a routerLink="/createAppointment">Ir a crear turno</a>
+  </div>
 </div>

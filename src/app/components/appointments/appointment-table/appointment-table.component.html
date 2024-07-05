@@ -16,179 +16,96 @@
 ></button>
 
 <h1>{{ currentUserRole === "ADMIN" ? "Turnos" : "Mis turnos" }}</h1>
-<p *ngIf="!appointments.length">Todavía no hay turnos</p>
+<ng-container *ngIf="!appointments.length; else showAppointments">
+  <p>Todavía no hay turnos</p>
+</ng-container>
 
-<!-- filters -->
-<div class="form-check form-check-inline">
-  <input
-    class="form-check-input"
-    type="radio"
-    name="inlineRadioOptions"
-    id="filterDay"
-    value="day"
-    [(ngModel)]="selectedFilterOption"
-  />
-  <label class="form-check-label" for="filterDay">Día</label>
-</div>
-<div class="form-check form-check-inline">
-  <input
-    class="form-check-input"
-    type="radio"
-    name="inlineRadioOptions"
-    id="filterTime"
-    value="time"
-    [(ngModel)]="selectedFilterOption"
-  />
-  <label class="form-check-label" for="filterTime">Hora</label>
-</div>
-<div class="form-check form-check-inline">
-  <input
-    class="form-check-input"
-    type="radio"
-    name="inlineRadioOptions"
-    id="filterSpecialty"
-    value="specialty"
-    [(ngModel)]="selectedFilterOption"
-  />
-  <label class="form-check-label" for="filterSpecialty">Especialidad</label>
-</div>
-<div
-  class="form-check form-check-inline"
-  *ngIf="
-    currentUserRole &&
-    (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
-  "
->
-  <input
-    class="form-check-input"
-    type="radio"
-    name="inlineRadioOptions"
-    id="filterProfessional"
-    value="professional"
-    [(ngModel)]="selectedFilterOption"
-  />
-  <label class="form-check-label" for="filterProfessional">Especialista</label>
-</div>
-<div
-  class="form-check form-check-inline"
-  *ngIf="
-    (currentUserRole && currentUserRole === 'ESPECIALISTA') ||
-    currentUserRole === 'ADMIN'
-  "
->
-  <input
-    class="form-check-input"
-    type="radio"
-    name="inlineRadioOptions"
-    id="filterPacient"
-    value="patient"
-    [(ngModel)]="selectedFilterOption"
-  />
-  <label class="form-check-label" for="filterPacient">Paciente</label>
-</div>
-<div class="form-check form-check-inline">
-  <input
-    class="form-check-input"
-    type="radio"
-    name="inlineRadioOptions"
-    id="filterStatus"
-    value="status"
-    [(ngModel)]="selectedFilterOption"
-  />
-  <label class="form-check-label" for="filterStatus">Estado</label>
-</div>
+<ng-template #showAppointments>
+  <!-- filters -->
+  <form class="d-flex divSearch" role="search">
+    <input
+      class="form-control me-2"
+      type="search"
+      placeholder="Buscar"
+      aria-label="Buscar"
+      [(ngModel)]="filterValue"
+      name="searchInput"
+    />
+    <button
+      class="btn btn-outline-secondary"
+      type="submit"
+      (click)="cleanFilters()"
+    >
+      Limpiar filtros
+    </button>
+  </form>
 
-<button
-  class="btn btn-light"
-  type="button"
-  [disabled]="!selectedFilterOption && !filterValue"
-  (click)="cleanFilters()"
->
-  Limpiar filtros
-</button>
-
-<form class="d-flex divSearch" role="search" (ngSubmit)="applyFilter()">
-  <input
-    class="form-control me-2"
-    type="search"
-    placeholder="Search"
-    aria-label="Search"
-    [(ngModel)]="filterValue"
-    name="searchInput"
-    [disabled]="!selectedFilterOption"
-  />
-  <button
-    class="btn btn-outline-success"
-    type="submit"
-    [disabled]="!selectedFilterOption || !filterValue.trim()"
-  >
-    Buscar
-  </button>
-</form>
-
-<!-- table -->
-<table class="table table-bordered" *ngIf="filteredAppointments">
-  <thead>
-    <tr>
-      <th scope="col"></th>
-      <th scope="col">Día</th>
-      <th scope="col">Hora</th>
-      <th scope="col">Especialidad</th>
-      <th
-        scope="col"
-        *ngIf="
-          currentUserRole &&
-          (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
-        "
-      >
-        Especialista
-      </th>
-      <th
-        scope="col"
-        *ngIf="
-          currentUserRole &&
-          (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
-        "
-      >
-        Paciente
-      </th>
-      <th scope="col">Estado</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngIf="filteredAppointments.length === 0">
-      <td colspan="6">No hay turnos con esos filtros.</td>
-    </tr>
-    <tr *ngFor="let item of filteredAppointments">
-      <td>
-        <input
-          class="form-check-input"
-          type="radio"
-          name="flexRadioDefault"
-          id="{{ 'flexRadioDefault_' + item.id }}"
-          (click)="handleClick(item?.id)"
-        />
-      </td>
-      <td>{{ item.day }}</td>
-      <td>{{ item.start_time }}</td>
-      <td>{{ item.specialty }}</td>
-      <td
-        *ngIf="
-          currentUserRole &&
-          (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
-        "
-      >
-        {{ item.professional_name }}
-      </td>
-      <td
-        *ngIf="
-          currentUserRole &&
-          (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
-        "
-      >
-        {{ item.patient_name }}
-      </td>
-      <td>{{ item.status }}</td>
-    </tr>
-  </tbody>
-</table>
+  <!-- table -->
+  <table class="table table-bordered" *ngIf="filteredAppointments">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">Fecha</th>
+        <th scope="col">Día</th>
+        <th scope="col">Hora</th>
+        <th scope="col">Especialidad</th>
+        <th
+          scope="col"
+          *ngIf="
+            currentUserRole &&
+            (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
+          "
+        >
+          Especialista
+        </th>
+        <th
+          scope="col"
+          *ngIf="
+            currentUserRole &&
+            (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
+          "
+        >
+          Paciente
+        </th>
+        <th scope="col">Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngIf="filteredAppointments.length === 0">
+        <td colspan="6">No hay turnos con esos filtros.</td>
+      </tr>
+      <tr *ngFor="let item of filteredAppointments">
+        <td>
+          <input
+            class="form-check-input"
+            type="radio"
+            name="flexRadioDefault"
+            id="{{ 'flexRadioDefault_' + item.id }}"
+            (click)="handleClick(item?.id)"
+          />
+        </td>
+        <td>{{ item.date }}</td>
+        <td>{{ item.day }}</td>
+        <td>{{ item.start_time }}</td>
+        <td>{{ item.specialty }}</td>
+        <td
+          *ngIf="
+            currentUserRole &&
+            (currentUserRole === 'PACIENTE' || currentUserRole === 'ADMIN')
+          "
+        >
+          {{ item.professional_name }}
+        </td>
+        <td
+          *ngIf="
+            currentUserRole &&
+            (currentUserRole === 'ESPECIALISTA' || currentUserRole === 'ADMIN')
+          "
+        >
+          {{ item.patient_name }}
+        </td>
+        <td>{{ item.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+</ng-template>

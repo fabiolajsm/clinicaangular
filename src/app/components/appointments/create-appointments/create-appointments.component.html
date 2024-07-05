@@ -21,9 +21,32 @@
     (selectionChange)="handleStepperSelectionChange($event)"
   >
     <!-- Step 1 -->
-    <mat-step>
+    <mat-step [completed]="form.valid" [editable]="!hasCreatedAppointment">
       <ng-template matStepLabel>Solicitar turno</ng-template>
       <form [formGroup]="form">
+        <!-- if is admin choose patient -->
+        <ng-container *ngIf="role === 'ADMIN' && patients">
+          <select
+            class="form-select selectPatient"
+            aria-label="patient select"
+            formControlName="patientId"
+            (change)="handleSelectPatient($event)"
+          >
+            <option value="" selected>Selecciona un paciente</option>
+            <option *ngFor="let item of patients" [value]="item.id">
+              {{ item.name }} {{ item.lastname }}
+            </option>
+          </select>
+          <p
+            class="error-msg"
+            *ngIf="
+              form.get('patientId')?.invalid &&
+              (form.get('patientId')?.dirty || form.get('patientId')?.touched)
+            "
+          >
+            Debe seleccionar un paciente
+          </p>
+        </ng-container>
         <!-- choose professional -->
         <div
           class="roundedButtons"
@@ -64,7 +87,8 @@
             </button>
           </div>
           <p class="text-value" *ngIf="form.get('specialty')?.value">
-            Especialidad seleccionada: {{ form.get("specialty")?.value }}
+            <span>Especialidad seleccionada:</span>
+            {{ form.get("specialty")?.value }}
           </p>
         </div>
 
@@ -88,7 +112,8 @@
 
         <div class="selected-day-container" *ngIf="selectedDay">
           <p class="text-value">
-            Fecha seleccionada: {{ selectedDay.date | date : "yyyy-MM-dd" }}
+            <span>Fecha seleccionada:</span>
+            {{ selectedDay.date | date : "yyyy-MM-dd" }}
           </p>
           <ul *ngIf="selectedDay.availableTimes.length > 0" class="time-list">
             <li
@@ -105,8 +130,8 @@
             </li>
           </ul>
           <p class="text-value" *ngIf="selectTime">
-            Horario seleccionado: {{ selectTime.startTime }} -
-            {{ selectTime.endTime }}
+            <span>Horario seleccionado:</span>
+            {{ selectTime.startTime }} - {{ selectTime.endTime }} hs
           </p>
           <div *ngIf="selectedDay.availableTimes.length === 0" class="no-times">
             <p>No hay turnos disponibles para este día.</p>
@@ -126,37 +151,44 @@
     </mat-step>
 
     <!-- Step 2 -->
-    <mat-step>
+    <mat-step [completed]="form.valid" [editable]="false">
       <ng-template matStepLabel>Confirmar</ng-template>
-      <div *ngIf="appointmentRequested">
+      <div *ngIf="appointmentRequested" class="appointmentRequested">
         <h3>Confirmación del turno</h3>
         <p>
-          <strong>Especialista:</strong>
+          <span>Especialista:</span>
           {{ appointmentRequested.professional_name }}
         </p>
+        <p><span>Especialidad:</span> {{ appointmentRequested.specialty }}</p>
         <p>
-          <strong>Especialidad:</strong> {{ appointmentRequested.specialty }}
-        </p>
-        <p>
-          <strong>Fecha:</strong> {{ appointmentRequested.day }},
+          <span>Fecha:</span> {{ appointmentRequested.day }},
           {{ appointmentRequested.date }}
         </p>
         <p>
-          <strong>Horario:</strong> {{ appointmentRequested.start_time }} -
-          {{ appointmentRequested.end_time }}
+          <span>Horario:</span> {{ appointmentRequested.start_time }} -
+          {{ appointmentRequested.end_time }} hs
+        </p>
+        <p *ngIf="role === 'ADMIN'">
+          <span> Paciente:</span>
+          {{ appointmentRequested.patient_name }}
         </p>
       </div>
       <div *ngIf="!appointmentRequested">
         <p>No se han seleccionado datos para confirmar aún.</p>
       </div>
       <div>
-        <button mat-button matStepperPrevious [disabled]="hasConfirm">
+        <button
+          mat-button
+          matStepperPrevious
+          [disabled]="hasConfirm && !hasCreatedAppointment"
+        >
           Atrás
         </button>
         <button
           mat-button
           matStepperNext
           (click)="handleCreateRequestAppointment()"
+          [disabled]="!appointmentRequested"
         >
           Finalizar
         </button>

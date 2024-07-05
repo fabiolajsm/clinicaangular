@@ -1,7 +1,12 @@
 import { Component } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Specialists, UserInterface } from '../../../interfaces/user.interface';
+import {
+  Patients,
+  Role,
+  Specialists,
+  UserInterface,
+} from '../../../interfaces/user.interface';
 import { SpecialtiesService } from '../../../services/specialties.service';
 import { AuthService } from '../../../services/auth.service';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
@@ -10,16 +15,19 @@ import {
   Schedules,
   Specialties,
 } from '../../../interfaces/specialties.interface';
-import { Appointment, Status } from '../../../interfaces/appointment.interface';
+import { Appointment } from '../../../interfaces/appointment.interface';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
 import { getAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { AppointmentService } from '../../../services/appointment.service';
+import { StringToDatePipe } from '../../../pipes/string-to-date.pipe';
+import { FormatDatePipe } from '../../../pipes/format-date.pipe';
 
 @Component({
   selector: 'app-create-appointments',
   standalone: true,
+  providers: [StringToDatePipe, FormatDatePipe],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -32,6 +40,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 })
 export class CreateAppointmentsComponent {
   form = this._formBuilder.group({
+    patientId: ['', Validators.required],
     professional: ['', Validators.required],
     specialty: ['', Validators.required],
     day: ['', Validators.required],
@@ -65,8 +74,11 @@ export class CreateAppointmentsComponent {
 
   appointmentRequested: Appointment | undefined = undefined;
   hasConfirm: boolean | undefined = undefined;
-  patientId: string | undefined = undefined;
+  hasCreatedAppointment: boolean | undefined = undefined;
   patientName: string | undefined = undefined;
+
+  role: Role | undefined = undefined;
+  patients: Patients[] | undefined = undefined;
 
   constructor(
     private _formBuilder: FormBuilder,
@@ -74,18 +86,32 @@ export class CreateAppointmentsComponent {
     private specialtiesService: SpecialtiesService,
     private appointmentService: AppointmentService,
     private spinner: NgxSpinnerService,
-    private router: Router
+    private router: Router,
+    private stringToDatePipe: StringToDatePipe,
+    private formatDatePipe: FormatDatePipe
   ) {}
 
   ngOnInit() {
     this.spinner.show();
-    const email = getAuth().currentUser?.email;
-    // get patient
-    if (email) {
-      this.authService.getUserByEmail(email).subscribe((response) => {
-        this.patientId = response?.id;
-        this.patientName = `${response?.name} ${response?.lastname}`;
+    this.role = this.authService.getRole() as Role;
+    if (this.role === 'ADMIN') {
+      // get patients
+      this.authService.getUsers().subscribe((response: UserInterface[]) => {
+        this.patients = response.filter(
+          (item) => item.role === 'PACIENTE'
+        ) as Patients[];
       });
+    } else {
+      const email = getAuth().currentUser?.email;
+      // get patient
+      if (email) {
+        this.authService.getUserByEmail(email).subscribe((response) => {
+          if (response?.id) {
+            this.form.get('patientId')?.setValue(response?.id);
+          }
+          this.patientName = `${response?.name} ${response?.lastname}`;
+        });
+      }
     }
     // Get specialties
     this.specialtiesService
@@ -178,12 +204,13 @@ export class CreateAppointmentsComponent {
   generateAppointmentTimes(date: Date): ScheduleTime[] {
     this.spinner.show();
     if (!this.professionalSchedule) return [];
-    const start = this.convertStringTimeToDate(
+    const start = this.stringToDatePipe.transform(
       this.professionalSchedule.start_time
     );
-    const end = this.convertStringTimeToDate(
+    const end = this.stringToDatePipe.transform(
       this.professionalSchedule.end_time
     );
+
     const interval = 30; // Intervalo en minutos
     const appointmentTimes: ScheduleTime[] = [];
     let current = new Date(start);
@@ -212,22 +239,12 @@ export class CreateAppointmentsComponent {
   isTimeSlotTaken(date: Date, startTime: string, endTime: string): boolean {
     const taken = this.datesTaken.some(
       (appt) =>
-        appt.date === this.formatDate(date) &&
+        appt.date === this.formatDatePipe.transform(date) &&
         appt.start_time === startTime &&
         appt.end_time === endTime &&
         (appt.status === 'PENDIENTE' || appt.status === 'ACEPTADO')
     );
     return taken;
-  }
-
-  formatDate(date: Date): string {
-    return `${date.getFullYear()}-${this.pad(date.getMonth() + 1)}-${this.pad(
-      date.getDate()
-    )}`;
-  }
-
-  pad(num: number): string {
-    return num < 10 ? '0' + num : num.toString();
   }
 
   convertStringTimeToDate(time: string): Date {
@@ -243,7 +260,7 @@ export class CreateAppointmentsComponent {
       this.form.get('start_time')?.setValue(null);
       this.form.get('end_time')?.setValue(null);
       this.selectedDay = day;
-      const formattedDate = this.formatDate(day.date);
+      const formattedDate = this.formatDatePipe.transform(day.date);
       this.form.get('day')?.setValue(this.getWeekDay(day.date));
       this.form.get('date')?.setValue(formattedDate);
     }
@@ -263,8 +280,8 @@ export class CreateAppointmentsComponent {
 
   handleSubmit() {
     if (!this.form.valid) return;
-
-    if (this.patientId && this.patientName) {
+    const patient = this.form.get('patientId')?.value;
+    if (patient && this.patientName) {
       const requestData: Appointment = {
         day: this.form.get('day')?.value ?? '',
         start_time: this.form.get('start_time')?.value ?? '',
@@ -274,7 +291,7 @@ export class CreateAppointmentsComponent {
         professional_name:
           `${this.professionalSelected?.name} ${this.professionalSelected?.lastname}` ??
           '',
-        patient_id: this.patientId,
+        patient_id: patient,
         patient_name: this.patientName,
         status: 'PENDIENTE',
         date: this.form.get('date')?.value ?? '' ?? '',
@@ -284,9 +301,20 @@ export class CreateAppointmentsComponent {
     }
   }
 
+  handleSelectPatient(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = inputElement.value;
+    if (!value) return;
+    const patient = this.patients?.find((item) => item.id === value);
+    if (patient) {
+      this.patientName = `${patient.name} ${patient.lastname}`;
+    }
+  }
+
   handleCreateRequestAppointment() {
-    if (!this.appointmentRequested) return;
+    this.hasCreatedAppointment = true;
     this.hasConfirm = true;
+    if (!this.appointmentRequested) return;
     this.appointmentService.createAppointment(this.appointmentRequested);
   }
 
@@ -297,8 +325,7 @@ export class CreateAppointmentsComponent {
   }
 
   handleReset() {
-    this.form.reset();
-    // clean states
+    // Clean other states
     this.professionalSelected = undefined;
     this.professionalSchedule = undefined;
     this.professionalAppointmentAvailable = undefined;
@@ -308,10 +335,20 @@ export class CreateAppointmentsComponent {
     this.selectedDay = undefined;
     this.selectTime = undefined;
     this.appointmentRequested = undefined;
+    this.hasConfirm = false;
+    this.hasCreatedAppointment = false;
+    // Preserve patientId if the role is PACIENTE
+    if (this.role === 'PACIENTE') {
+      const patientIdValue = this.form.get('patientId')?.value;
+      this.form.reset();
+      this.form.get('patientId')?.setValue(patientIdValue ?? '');
+    } else {
+      this.form.reset();
+    }
   }
 
   handleBack() {
-    this.router.navigate(['/']);
+    this.router.navigate([this.role === 'ADMIN' ? '/appointment' : '/']);
     this.handleReset();
   }
 }

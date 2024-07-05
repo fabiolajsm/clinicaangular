@@ -19,11 +19,18 @@ import {
 } from '@angular/forms';
 import { AppointmentService } from '../../../services/appointment.service';
 import { PatientHistoryService } from '../../../services/patient-history.service';
+import { ActionModalTitlePipe } from '../../../pipes/action-modal-title.pipe';
 
 @Component({
   selector: 'app-appointment-actions',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxSpinnerModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NgxSpinnerModule,
+    ReactiveFormsModule,
+    ActionModalTitlePipe,
+  ],
   templateUrl: './appointment-actions.component.html',
   styleUrl: './appointment-actions.component.scss',
 })
@@ -37,21 +44,21 @@ export class AppointmentActionsComponent {
   hasToShowAcceptAction: boolean = false;
   hasToShowDeclineAction: boolean = false;
   hasToShowFinishAction: boolean = false;
-
   // Visibility flags for patient
   hasToShowProfessionalReview: boolean = false;
   hasToShowRateProfessional: boolean = false;
   hasToShowQuestionnaire: boolean = false;
-
+  hasToShowAnswersQuestionnaire: boolean = false;
+  hasToShowAnswerRateProfessional: boolean = false;
   // Visibility flags for specialist
   hasToShowPatientReview: boolean = false;
-
-  reviewComment: string = '';
+  hasToShowTheirReviewSpecialist: boolean = false;
+  // show comments
+  message: string = '';
 
   role: string = '';
   modalTitle: string = '';
   action: AppointmentActions | undefined = undefined;
-
   hasCreatedAction: boolean = false;
 
   constructor(
@@ -141,114 +148,149 @@ export class AppointmentActionsComponent {
     this.handleActionsVisibility();
   }
 
+  handleActionsVisibility() {
+    this.hasCreatedAction = false;
+    if (!this.itemSelected) return;
+
+    const status = this.itemSelected.status;
+    this.cleanActions();
+
+    switch (this.role) {
+      case 'PACIENTE':
+        this.handlePatientActions(status);
+        break;
+      case 'ESPECIALISTA':
+        this.handleProfessionalActions(status);
+        break;
+      case 'ADMIN':
+        this.hasToShowCancelAction = status === 'PENDIENTE';
+        break;
+      default:
+        break;
+    }
+  }
+
+  private handlePatientActions(status: string) {
+    this.hasToShowCancelAction =
+      status === 'ACEPTADO' || status === 'PENDIENTE';
+    if (this.itemSelected?.id) {
+      this.appointmentService
+        .getExtraInfoByAppointmentId(this.itemSelected.id)
+        .subscribe((extraInfo: Appointment_Extra_Info[]) => {
+          const hasDiagnosisAndComment = extraInfo.find(
+            (item) => item.diagnosis && item.comment
+          ); // tiene un diagnostico
+          this.hasToShowProfessionalReview =
+            hasDiagnosisAndComment && status === 'REALIZADO' ? true : false;
+
+          const hasPoints = extraInfo.some((item) => item.points); // si evaluo al profesional
+          this.hasToShowRateProfessional =
+            !hasPoints && status === 'REALIZADO' ? true : false;
+          this.hasToShowAnswerRateProfessional =
+            hasPoints && status === 'REALIZADO' ? true : false;
+
+          const hasQuality = extraInfo.find((item) => item.quality); // si completo el cuestionario
+          this.hasToShowQuestionnaire =
+            !hasQuality && status === 'REALIZADO' ? true : false;
+          this.hasToShowAnswersQuestionnaire =
+            hasQuality && status === 'REALIZADO' ? true : false;
+        });
+    }
+  }
+
+  private handleProfessionalActions(status: string) {
+    this.hasToShowCancelAction = status === 'ACEPTADO';
+    this.hasToShowDeclineAction = status === 'PENDIENTE';
+    this.hasToShowAcceptAction = status === 'PENDIENTE';
+    this.hasToShowFinishAction = status === 'ACEPTADO';
+
+    if (this.itemSelected?.id) {
+      this.appointmentService
+        .getExtraInfoByAppointmentId(this.itemSelected.id)
+        .subscribe((extraInfo: Appointment_Extra_Info[]) => {
+          const hasPointsAndComment = extraInfo.find(
+            (item) => item.points && item.comment
+          );
+          this.hasToShowPatientReview =
+            hasPointsAndComment && status === 'REALIZADO' ? true : false; // si el paciente lo califico
+
+          //dejo un diagnostico
+          const hasLeftReview = extraInfo.find(
+            (item) => item.comment && item.diagnosis
+          );
+          this.hasToShowTheirReviewSpecialist =
+            status === 'REALIZADO' && hasLeftReview ? true : false;
+        });
+    }
+  }
+
   cleanActions() {
     // Reset all visibility flags
     this.hasToShowCancelAction = false;
     this.hasToShowAcceptAction = false;
     this.hasToShowDeclineAction = false;
     this.hasToShowFinishAction = false;
+    // Visibility flags for patient
     this.hasToShowProfessionalReview = false;
     this.hasToShowRateProfessional = false;
     this.hasToShowQuestionnaire = false;
+    this.hasToShowAnswersQuestionnaire = false;
+    this.hasToShowAnswerRateProfessional = false;
+    // Visibility flags for specialist
     this.hasToShowPatientReview = false;
-    // reset comment:
-    this.reviewComment = '';
-  }
+    this.hasToShowTheirReviewSpecialist = false;
 
-  handleActionsVisibility() {
-    this.hasCreatedAction = false;
-    if (this.itemSelected) {
-      const status = this.itemSelected.status;
-      this.cleanActions();
-      switch (this.role) {
-        case 'PACIENTE':
-          this.hasToShowCancelAction =
-            status === 'ACEPTADO' || status === 'PENDIENTE';
-          if (this.itemSelected.id) {
-            this.appointmentService
-              .getExtraInfoByAppointmentId(this.itemSelected.id)
-              .subscribe((extraInfo: Appointment_Extra_Info[]) => {
-                const hasDiagnosisAndComment = extraInfo.find(
-                  (item) => item.diagnosis && item.comment
-                );
-                const hasPoints = extraInfo.some((item) => item.points);
-                const hasQuality = extraInfo.some((item) => item.quality);
-
-                this.hasToShowProfessionalReview =
-                  hasDiagnosisAndComment && status === 'REALIZADO'
-                    ? true
-                    : false; // si el profesional cargo comentario y diagnosis
-                if (this.hasToShowProfessionalReview) {
-                  this.reviewComment = `Comentario: ${hasDiagnosisAndComment?.comment}. Diagnostico: ${hasDiagnosisAndComment?.diagnosis}`;
-                }
-                this.hasToShowRateProfessional =
-                  !hasPoints && status === 'REALIZADO' ? true : false; // si no califico la atencion del especialista
-                this.hasToShowQuestionnaire =
-                  !hasQuality && status === 'REALIZADO' ? true : false; // si no hizo el cuestionario
-              });
-          }
-          break;
-        case 'ESPECIALISTA':
-          this.hasToShowCancelAction = status === 'ACEPTADO';
-          this.hasToShowDeclineAction = status === 'PENDIENTE';
-          this.hasToShowAcceptAction = status === 'PENDIENTE';
-          this.hasToShowFinishAction = status === 'ACEPTADO';
-
-          if (this.itemSelected.id) {
-            this.appointmentService
-              .getExtraInfoByAppointmentId(this.itemSelected.id)
-              .subscribe((extraInfo) => {
-                const hasPointsAndComment = extraInfo.find(
-                  (item) => item.points && item.comment
-                );
-                this.hasToShowPatientReview =
-                  hasPointsAndComment && status === 'REALIZADO' ? true : false; // si el paciente lo califico
-                if (this.hasToShowPatientReview) {
-                  this.reviewComment = `Comentario: ${hasPointsAndComment?.comment}. Puntaje: ${hasPointsAndComment?.points}`;
-                }
-              });
-          }
-          break;
-        case 'ADMIN':
-          this.hasToShowCancelAction = status === 'PENDIENTE';
-          break;
-        default:
-          break;
-      }
-    }
+    this.message = '';
   }
 
   handleClickAction(actionName: AppointmentActions) {
     this.action = actionName;
-    switch (actionName) {
-      case 'CANCELADO':
-        this.modalTitle = 'Cancelar turno';
-        break;
-      case 'RECHAZADO':
-        this.modalTitle = 'Rechazar turno';
-        break;
-      case 'ACEPTADO':
-        this.modalTitle = 'Aceptar turno';
-        break;
-      case 'REALIZADO':
-        this.modalTitle = 'Finalizar turno';
-        break;
-      case 'CALIFICAR':
-        this.modalTitle = 'Calificar atención';
-        break;
-      case 'COMPLETAR_CUESTIONARIO':
-        this.modalTitle = 'Completar cuestionario';
-        break;
-      case 'VER_REVIEW_PROFESIONAL':
-        this.modalTitle = 'Ver comentario/diagnostico del profesional';
-        break;
-      case 'VER_REVIEW_PACIENTE':
-        this.modalTitle = 'Ver comentario/calificacion del paciente';
-        break;
-      default:
-        this.action = undefined;
-        break;
-    }
+
+    if (this.handleShowForm() || !this.itemSelected?.id) return;
+    this.spinner.show();
+    this.appointmentService
+      .getExtraInfoByAppointmentId(this.itemSelected.id)
+      .subscribe((extraInfo: Appointment_Extra_Info[]) => {
+        if (!extraInfo) return;
+        switch (this.action) {
+          case 'VER_REVIEW_PACIENTE':
+          case 'VER_REVIEW_PROFESIONAL_PACIENTE':
+            const hasPointsAndComment = extraInfo.find(
+              (item) => item.points && item.comment
+            );
+            this.message = `Puntaje: ${hasPointsAndComment?.points}. Comentario: ${hasPointsAndComment?.comment}`;
+            break;
+          case 'VER_MI_COMENTARIO_DIAGNOSTICO':
+          case 'VER_REVIEW_PROFESIONAL':
+            const hasDiagnosis = extraInfo.find(
+              (item) => item.diagnosis && item.comment
+            );
+            this.message = `Diagnóstico: ${hasDiagnosis?.diagnosis}. Comentario: ${hasDiagnosis?.comment}`;
+            break;
+          case 'VER_CUESTIONARIO':
+            const hasQuality = extraInfo.find(
+              (item) => item.quality && item.facilitiesAndConditions
+            );
+            this.message = `Comentario: ${hasQuality?.comment}. Calidad del servicio (1-10): ${hasQuality?.quality} Instalaciones y condiciones (1-10): ${hasQuality?.facilitiesAndConditions}. Tiempo de espera (1-10): ${hasQuality?.waitTime}. Seguridad y privacidad (1-10): ${hasQuality?.securityAndPrivacy}`;
+            break;
+          default:
+            this.message = '';
+            break;
+        }
+        this.spinner.hide();
+      });
+  }
+
+  handleShowForm() {
+    return (
+      // professional
+      this.action !== 'VER_REVIEW_PACIENTE' &&
+      this.action !== 'VER_MI_COMENTARIO_DIAGNOSTICO' &&
+      // patient
+      this.action !== 'VER_REVIEW_PROFESIONAL' &&
+      this.action !== 'VER_CUESTIONARIO' &&
+      this.action !== 'VER_REVIEW_PROFESIONAL_PACIENTE'
+    );
   }
 
   handleSubmit() {
@@ -265,7 +307,6 @@ export class AppointmentActionsComponent {
         return;
       }
 
-      // Si es valido el form y se crean los datos, se actualiza el estado del turno
       if (
         [
           'CANCELADO',
@@ -361,7 +402,6 @@ export class AppointmentActionsComponent {
             return false;
           }
         }
-        break;
       case 'CALIFICAR':
         if (!comment || !points) {
           if (!comment) {
@@ -467,8 +507,10 @@ export class AppointmentActionsComponent {
     }
 
     this.formHistoryPatient.setErrors(null);
+    if (!this.itemSelected?.id) return false;
     const patientHistory: PatientHistory = {
       id_patient: this.itemSelected?.patient_id || '',
+      id_appointment: this.itemSelected?.id,
       height: height,
       weight: weight,
       temperature: temperature,
@@ -487,5 +529,21 @@ export class AppointmentActionsComponent {
   handleCloseModal() {
     this.form.reset();
     this.formHistoryPatient.reset();
+  }
+
+  hasToShowAction(): boolean {
+    return (
+      this.hasToShowCancelAction ||
+      this.hasToShowDeclineAction ||
+      this.hasToShowAcceptAction ||
+      this.hasToShowFinishAction ||
+      this.hasToShowProfessionalReview ||
+      this.hasToShowQuestionnaire ||
+      this.hasToShowAnswersQuestionnaire ||
+      this.hasToShowRateProfessional ||
+      this.hasToShowAnswerRateProfessional ||
+      this.hasToShowPatientReview ||
+      this.hasToShowTheirReviewSpecialist
+    );
   }
 }

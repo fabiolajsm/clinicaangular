@@ -91,7 +91,9 @@
                 />
               </div>
             </div>
-            <hr />
+            <ng-container *ngIf="user.role === 'PACIENTE'">
+              <hr />
+            </ng-container>
             <!-- buttons see patient history -->
             <div class="row" *ngIf="user.role === 'PACIENTE'">
               <div class="col-sm-3">
@@ -106,13 +108,16 @@
                 >
                   Ver historial clínico
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  (click)="downloadPatientHistory()"
-                >
-                  Descargar historial clínico
-                </button>
+
+                <ng-container *ngIf="patientData && patientData.length > 0">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    (click)="downloadPatientHistory()"
+                  >
+                    Descargar historial clínico
+                  </button>
+                </ng-container>
               </div>
             </div>
           </div>

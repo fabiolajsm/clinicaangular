@@ -92,4 +92,23 @@
 .text-value {
   font-size: 14px;
   margin-top: 10px;
+  span {
+    font-weight: 500;
+  }
+}
+
+.selectPatient {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.appointmentRequested {
+  h3 {
+    font-size: 24px;
+    font-weight: 500;
+  }
+  span {
+    font-weight: 500;
+  }
+  font-size: 14px;
 }

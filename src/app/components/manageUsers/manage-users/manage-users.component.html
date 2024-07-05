@@ -1,7 +1,7 @@
 <div class="infoContainer">
   <app-users-table (userSelected)="handleItemSelected($event)" />
   <app-user-detail [userSelected]="userSelected" />
-  <div class="register-link">
+  <div class="redirectlink">
     <p>¿Quieres agregar un usuario?</p>
     <a routerLink="/register">Ir al registro</a>
   </div>

@@ -10,7 +10,10 @@ export type AppointmentActions =
   | 'VER_REVIEW_PROFESIONAL'
   | 'COMPLETAR_CUESTIONARIO'
   | 'CALIFICAR'
-  | 'VER_REVIEW_PACIENTE';
+  | 'VER_REVIEW_PACIENTE'
+  | 'VER_MI_COMENTARIO_DIAGNOSTICO'
+  | 'VER_CUESTIONARIO'
+  | 'VER_REVIEW_PROFESIONAL_PACIENTE';
 export interface Appointment {
   id?: string | undefined;
   day: string;
@@ -36,6 +39,7 @@ export interface Appointment_Extra_Info {
 }
 export interface PatientHistory {
   id_patient: string;
+  id_appointment: string;
   height: number;
   weight: number;
   temperature: number;

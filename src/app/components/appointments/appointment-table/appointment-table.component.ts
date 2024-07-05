@@ -22,7 +22,6 @@ export class AppointmentTableComponent {
   currentUserRole: string = '';
   users: UserInterface[] = [];
 
-  selectedFilterOption: string = ''; // value type (day, time, specialty, etc.)
   filterValue: string = ''; // value to serach
   auxItemSelected: Appointment | undefined;
 
@@ -71,64 +70,8 @@ export class AppointmentTableComponent {
     });
   }
 
-  applyFilter() {
-    if (!this.selectedFilterOption || !this.filterValue) {
-      this.filteredAppointments = [...this.appointments];
-      return;
-    }
-
-    this.filterValue = this.filterValue.trim();
-    switch (this.selectedFilterOption) {
-      case 'day':
-        this.filteredAppointments = this.appointments.filter((item) =>
-          item.day.toLowerCase().includes(this.filterValue.toLowerCase())
-        );
-        break;
-      case 'time':
-        this.filteredAppointments = this.appointments.filter((item) =>
-          item.start_time.toLowerCase().includes(this.filterValue.toLowerCase())
-        );
-        break;
-      case 'specialty':
-        this.filteredAppointments = this.appointments.filter((item) =>
-          item.specialty.toLowerCase().includes(this.filterValue.toLowerCase())
-        );
-        break;
-      case 'patient':
-        this.filteredAppointments = this.appointments.filter((item) =>
-          item.patient_name
-            .toLowerCase()
-            .includes(this.filterValue.toLowerCase())
-        );
-        break;
-      case 'professional':
-        this.filteredAppointments = this.appointments.filter((item) =>
-          item.professional_name
-            .toLowerCase()
-            .includes(this.filterValue.toLowerCase())
-        );
-        break;
-      case 'status':
-        this.filteredAppointments = this.appointments.filter((item) =>
-          item.status.toLowerCase().includes(this.filterValue.toLowerCase())
-        );
-        break;
-      default:
-        this.filteredAppointments = [...this.appointments];
-        break;
-    }
-    if (
-      this.auxItemSelected &&
-      !this.filteredAppointments.includes(this.auxItemSelected)
-    ) {
-      this.auxItemSelected = undefined;
-      this.itemSelected.emit(undefined);
-    }
-  }
-
   cleanFilters() {
     this.filteredAppointments = [...this.appointments];
-    this.selectedFilterOption = '';
     this.filterValue = '';
   }
 
