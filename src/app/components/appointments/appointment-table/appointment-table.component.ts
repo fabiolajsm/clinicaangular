@@ -8,11 +8,19 @@ import { AuthService } from '../../../services/auth.service';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { getAuth } from '@angular/fire/auth';
 import { FormsModule } from '@angular/forms';
+import { PatientHistoryService } from '../../../services/patient-history.service';
+import { FormatPatientHistoryDataPipe } from '../../../pipes/format-patient-history-data.pipe';
 
 @Component({
   selector: 'app-appointment-table',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgxSpinnerModule, FormsModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NgxSpinnerModule,
+    FormsModule,
+    FormatPatientHistoryDataPipe,
+  ],
   templateUrl: './appointment-table.component.html',
   styleUrl: './appointment-table.component.scss',
 })
@@ -31,6 +39,7 @@ export class AppointmentTableComponent {
     private router: Router,
     private authService: AuthService,
     private appointmentService: AppointmentService,
+    private patientHistoryService: PatientHistoryService,
     private spinner: NgxSpinnerService
   ) {}
 
@@ -64,6 +73,17 @@ export class AppointmentTableComponent {
           });
 
         // at first we show all the appointments without filters
+        this.appointments.forEach((element) => {
+          if (element.status === 'REALIZADO' && element.id) {
+            this.patientHistoryService
+              .getPatientHistoryByAppointment(element.patient_id, element.id)
+              .subscribe((res) => {
+                element.patientHistory = res;
+              });
+          }
+        });
+        console.log(this.appointments, 'aaca');
+
         this.filteredAppointments = [...this.appointments];
         this.spinner.hide();
       });

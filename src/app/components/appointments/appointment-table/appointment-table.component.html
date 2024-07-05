@@ -68,6 +68,12 @@
           Paciente
         </th>
         <th scope="col">Estado</th>
+        <ng-container *ngIf="currentUserRole !== 'ADMIN'">
+          <th scope="col">Altura</th>
+          <th scope="col">Peso</th>
+          <th scope="col">Temperatura</th>
+          <th scope="col">Presión arterial</th>
+        </ng-container>
       </tr>
     </thead>
     <tbody>
@@ -105,6 +111,30 @@
           {{ item.patient_name }}
         </td>
         <td>{{ item.status }}</td>
+        <ng-container *ngIf="currentUserRole !== 'ADMIN'">
+          <td>
+            {{
+              item.patientHistory?.height | formatPatientHistoryData : "height"
+            }}
+          </td>
+          <td>
+            {{
+              item.patientHistory?.weight | formatPatientHistoryData : "weight"
+            }}
+          </td>
+          <td>
+            {{
+              item.patientHistory?.temperature
+                | formatPatientHistoryData : "temperature"
+            }}
+          </td>
+          <td>
+            {{
+              item.patientHistory?.pressure
+                | formatPatientHistoryData : "pressure"
+            }}
+          </td>
+        </ng-container>
       </tr>
     </tbody>
   </table>
