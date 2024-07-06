@@ -82,8 +82,6 @@ export class AppointmentTableComponent {
               });
           }
         });
-        console.log(this.appointments, 'aaca');
-
         this.filteredAppointments = [...this.appointments];
         this.spinner.hide();
       });
@@ -108,5 +106,49 @@ export class AppointmentTableComponent {
 
   handleBack() {
     this.router.navigate(['/']);
+  }
+
+  // filters
+  applyFilter() {
+    if (!this.filterValue.trim()) {
+      this.filteredAppointments = this.appointments;
+    } else {
+      const filter = this.filterValue.trim().toLowerCase();
+      this.filteredAppointments = this.appointments.filter((appointment) => {
+        return (
+          appointment.date.toLowerCase().includes(filter) ||
+          appointment.day.toLowerCase().includes(filter) ||
+          appointment.start_time.toLowerCase().includes(filter) ||
+          appointment.end_time.toLowerCase().includes(filter) ||
+          appointment.specialty.toLowerCase().includes(filter) ||
+          (this.currentUserRole !== 'ADMIN' &&
+            appointment.patientHistory?.height.toString().includes(filter)) ||
+          (this.currentUserRole !== 'ADMIN' &&
+            appointment.patientHistory?.weight.toString().includes(filter)) ||
+          (this.currentUserRole !== 'ADMIN' &&
+            appointment.patientHistory?.temperature
+              .toString()
+              .includes(filter)) ||
+          (this.currentUserRole !== 'ADMIN' &&
+            appointment.patientHistory?.pressure.toString().includes(filter)) ||
+          ((this.currentUserRole === 'PACIENTE' ||
+            this.currentUserRole === 'ADMIN') &&
+            appointment.professional_name.toLowerCase().includes(filter)) ||
+          ((this.currentUserRole === 'ESPECIALISTA' ||
+            this.currentUserRole === 'ADMIN') &&
+            appointment.patient_name.toLowerCase().includes(filter)) ||
+          appointment.status.toLowerCase().includes(filter)
+        );
+      });
+      if (
+        this.auxItemSelected?.id &&
+        !this.filteredAppointments.some(
+          (item) => item?.id === this.auxItemSelected?.id
+        )
+      ) {
+        this.auxItemSelected = undefined;
+        this.itemSelected.emit(undefined);
+      }
+    }
   }
 }

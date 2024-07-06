@@ -30,6 +30,7 @@
       aria-label="Buscar"
       [(ngModel)]="filterValue"
       name="searchInput"
+      (input)="applyFilter()"
     />
     <button
       class="btn btn-outline-secondary"
@@ -47,7 +48,7 @@
         <th scope="col"></th>
         <th scope="col">Fecha</th>
         <th scope="col">Día</th>
-        <th scope="col">Hora</th>
+        <th scope="col">Horario</th>
         <th scope="col">Especialidad</th>
         <th
           scope="col"
@@ -92,7 +93,7 @@
         </td>
         <td>{{ item.date }}</td>
         <td>{{ item.day }}</td>
-        <td>{{ item.start_time }}</td>
+        <td>{{ item.start_time }} - {{ item.end_time }}</td>
         <td>{{ item.specialty }}</td>
         <td
           *ngIf="
