@@ -1,1 +1,63 @@
-<p>my-patients works!</p>
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<div class="infoContainer">
+  <button
+    type="button"
+    class="fa fa-arrow-left icon-button"
+    aria-hidden="true"
+    (click)="handleBack()"
+  ></button>
+  <h1>Mis pacientes</h1>
+
+  <ng-container
+    *ngIf="
+      patientsWithAppointments && patientsWithAppointments.length > 0 && appointments;
+      else emptyPatients
+    "
+    class="patient-cards-container"
+  >
+    <div
+      class="card patientCard"
+      *ngFor="let patient of patientsWithAppointments"
+    >
+      <img
+        *ngIf="patient?.profilePicture"
+        class="card-img-top imagen"
+        [src]="patient?.profilePicture"
+        alt="Foto de perfil"
+      />
+      <div class="card-body">
+        <h5 class="card-title">{{ patient.name }}{{ patient.lastname }}</h5>
+        <p class="card-text">
+          <span>DNI: </span>{{ patient.dni }} - <span>Edad: </span>
+          {{ patient.age }} - <span>Obra social: </span
+          >{{ patient.healthInsurance }}
+        </p>
+      </div>
+      <div class="card-body">
+        <button
+          class="btn btn-outline-secondary"
+          data-bs-toggle="modal"
+          data-bs-target="#staticBackdrop"
+          type="button"
+          (click)="togglePatientSelection(patient?.id)"
+        >
+          Ver detalle
+        </button>
+      </div>
+    </div>
+    <app-patient-history
+      [appointments]="appointments"
+      [showLastThreeAppointments]="true"
+    />
+  </ng-container>
+
+  <ng-template #emptyPatients>No ha atendido a ningún paciente</ng-template>
+</div>

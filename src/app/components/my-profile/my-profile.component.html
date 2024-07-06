@@ -110,7 +110,7 @@
                   Ver historial clínico
                 </button>
 
-                <ng-container *ngIf="patientData && patientData.length > 0">
+                <ng-container *ngIf="appointments && appointments.length > 0">
                   <button
                     type="button"
                     class="btn btn-secondary"
@@ -217,7 +217,10 @@
     </div>
   </ng-container>
 
-  <app-patient-history [patientData]="patientData" />
+  <app-patient-history
+    [appointments]="appointments"
+    [showLastThreeAppointments]="false"
+  />
 
   <ng-template #emptyDetail>
     <p>No hay datos para mostrar</p>

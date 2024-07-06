@@ -60,6 +60,25 @@ export class AppointmentService {
     >;
   }
 
+  getAppointmentsBySpecialistAndPatient(
+    specialistId: string,
+    patientId: string
+  ): Observable<Appointment[]> {
+    const appRef: CollectionReference = collection(
+      this.firestore,
+      this.collectionName
+    );
+    const queryConstraints: QueryConstraint[] = [
+      where('professional_id', '==', specialistId),
+      where('patient_id', '==', patientId),
+      where('status', '==', 'REALIZADO'),
+    ];
+    const appQuery = query(appRef, ...queryConstraints);
+    return collectionData(appQuery, { idField: 'id' }) as Observable<
+      Appointment[]
+    >;
+  }
+
   updateAppointmentStatus(appId: string, status: string) {
     const appRef = doc(this.firestore, this.collectionName, appId);
     updateDoc(appRef, {

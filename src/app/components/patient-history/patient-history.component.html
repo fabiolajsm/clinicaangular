@@ -23,19 +23,42 @@
 
       <div class="modal-body">
         <ng-container
-          *ngIf="patientData && patientData.length > 0; else emptyDetail"
+          *ngIf="appointments && appointments.length > 0; else emptyDetail"
         >
-          <div *ngFor="let item of patientData">
+          <div *ngFor="let appointment of appointments">
             <p>
-              Altura: {{ item.height }}. Peso: {{ item.weight }}. Temperatura:
-              {{ item.temperature }}. Presión arterial: {{ item.pressure }}
-              <ng-container *ngIf="item && item.extraData">
-                <span *ngFor="let key of getExtraDataKeys(item.extraData)">
-                  {{ key }}: {{ item.extraData[key] }}
-                </span>
-              </ng-container>
+              <strong>Turno</strong>
+              Día: {{ appointment.day }}, Horario:
+              {{ appointment.start_time }} - {{ appointment.end_time }}, Fecha:
+              {{ appointment.date }}, Especialidad: {{ appointment.specialty }}
+              {{
+                role === "PACIENTE"
+                  ? ", Especialista: " + appointment.professional_name
+                  : ""
+              }}
             </p>
-            <br />
+
+            <div *ngIf="appointment.patientHistory">
+              <p>
+                <strong>Detalle: </strong>
+                Altura: {{ appointment.patientHistory.height }}. Peso:
+                {{ appointment.patientHistory.weight }}. Temperatura:
+                {{ appointment.patientHistory.temperature }}. Presión arterial:
+                {{ appointment.patientHistory.pressure }}
+                <ng-container *ngIf="appointment.patientHistory.extraData">
+                  <span
+                    *ngFor="
+                      let key of getExtraDataKeys(
+                        appointment.patientHistory.extraData
+                      )
+                    "
+                  >
+                    {{ key }}: {{ appointment.patientHistory.extraData[key] }}
+                  </span>
+                </ng-container>
+              </p>
+            </div>
+            <hr />
           </div>
         </ng-container>
         <ng-template #emptyDetail>

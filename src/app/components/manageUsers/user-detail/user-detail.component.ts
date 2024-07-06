@@ -10,7 +10,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { AuthService } from '../../../services/auth.service';
 import { RouterModule } from '@angular/router';
 import { PatientHistoryComponent } from '../../patient-history/patient-history.component';
-import { PatientHistory } from '../../../interfaces/appointment.interface';
+import { Appointment } from '../../../interfaces/appointment.interface';
 import { PatientHistoryService } from '../../../services/patient-history.service';
 
 @Component({
@@ -27,7 +27,8 @@ import { PatientHistoryService } from '../../../services/patient-history.service
 })
 export class UserDetailComponent {
   @Input() userSelected: UserInterface | Patients | Specialists | undefined;
-  patientData: PatientHistory[] | undefined;
+  @Input() appointments: Appointment[] | undefined;
+  patientAppointments: Appointment[] | undefined;
 
   constructor(
     private authService: AuthService,
@@ -56,22 +57,33 @@ export class UserDetailComponent {
   ngOnChanges() {
     if (
       this.userSelected &&
-      this.userSelected?.role === 'PACIENTE' &&
-      this.userSelected.id
+      this.userSelected.role === 'PACIENTE' &&
+      this.userSelected.id &&
+      this.appointments
     ) {
-      this.patientHistoryService
-        .getPatientHistory(this.userSelected.id)
-        .subscribe(
-          (response: PatientHistory[] | undefined) => {
-            console.log(response, 'response');
-            
-            this.patientData = response;
-          },
-          (error) => {
-            console.error('Error fetching patient history:', error);
-          }
-        );
+      this.patientAppointments = this.appointments.filter(
+        (item) => item.patient_id === this.userSelected?.id
+      );
+      if (this.patientAppointments) {
+        this.patientAppointments.forEach((appointment) => {
+          this.assignPatientHistoryToAppointments(appointment);
+        });
+      }
     }
+  }
+
+  private assignPatientHistoryToAppointments(
+    appointmentToUpdate: Appointment
+  ): void {
+    if (!appointmentToUpdate.patient_id || !appointmentToUpdate.id) return;
+    this.patientHistoryService
+      .getPatientHistoryByAppointment(
+        appointmentToUpdate.patient_id,
+        appointmentToUpdate.id
+      )
+      .subscribe((history) => {
+        appointmentToUpdate.patientHistory = history;
+      });
   }
 
   getData(role: Role): string {

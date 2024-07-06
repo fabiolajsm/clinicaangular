@@ -45,7 +45,10 @@
     </div>
   </div>
   <!-- End of card -->
-  <app-patient-history [patientData]="patientData" />
+  <app-patient-history
+    [appointments]="patientAppointments"
+    [showLastThreeAppointments]="false"
+  />
 </ng-container>
 
 <ng-template #emptyDetail>

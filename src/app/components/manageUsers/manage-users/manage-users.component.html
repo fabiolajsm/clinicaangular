@@ -1,6 +1,16 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+>
+  <p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
 <div class="infoContainer">
   <app-users-table (userSelected)="handleItemSelected($event)" />
-  <app-user-detail [userSelected]="userSelected" />
+  <app-user-detail [userSelected]="userSelected" [appointments]="appointments" />
   <div class="redirectlink">
     <p>¿Quieres agregar un usuario?</p>
     <a routerLink="/register">Ir al registro</a>

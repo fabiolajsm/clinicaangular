@@ -9,7 +9,6 @@ import {
 } from '../../interfaces/user.interface';
 import { SpecialtiesService } from '../../services/specialties.service';
 import { Router } from '@angular/router';
-import { getAuth } from 'firebase/auth';
 import { Schedules } from '../../interfaces/specialties.interface';
 import {
   AbstractControl,
@@ -20,9 +19,12 @@ import {
 } from '@angular/forms';
 import { PatientHistoryComponent } from '../patient-history/patient-history.component';
 import { PatientHistoryService } from '../../services/patient-history.service';
-import { PatientHistory } from '../../interfaces/appointment.interface';
-import jsPDF from 'jspdf';
+import {
+  Appointment,
+  PatientHistory,
+} from '../../interfaces/appointment.interface';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { AppointmentService } from '../../services/appointment.service';
 
 @Component({
   selector: 'app-my-profile',
@@ -48,18 +50,21 @@ export class MyProfileComponent {
   email: string | null | undefined = null;
   schedules: Schedules | null = null;
   form: FormGroup;
-  patientData: PatientHistory[] | undefined;
+  appointments: Appointment[] | undefined;
 
   constructor(
     private router: Router,
     private authService: AuthService,
     private specialtiesService: SpecialtiesService,
     private spinner: NgxSpinnerService,
-    private patientHistoryService: PatientHistoryService
+    private patientHistoryService: PatientHistoryService,
+    private appointmentService: AppointmentService
   ) {
     this.form = this.createForm();
 
-    this.email = getAuth().currentUser?.email;
+    this.email = this.authService.getCurrentUserEmail();
+    console.log(this.email, 'acaaa email');
+
     if (!this.email) return;
     this.spinner.show();
     this.authService.getUserByEmail(this.email).subscribe((currentUserData) => {
@@ -74,14 +79,18 @@ export class MyProfileComponent {
           });
       }
       if (this.user?.role === 'PACIENTE' && this.user.id) {
-        this.patientHistoryService.getPatientHistory(this.user.id).subscribe(
-          (response: PatientHistory[] | undefined) => {
-            this.patientData = response;
-          },
-          (error) => {
-            console.error('Error fetching patient history:', error);
+        this.appointmentService.getAppointments().subscribe((response) => {
+          this.appointments = response.filter(
+            (item) =>
+              item.status === 'REALIZADO' && item.patient_id === this.user?.id
+          );
+
+          if (this.appointments) {
+            this.appointments.forEach((appointment) => {
+              this.assignPatientHistoryToAppointments(appointment);
+            });
           }
-        );
+        });
       }
       this.spinner.hide();
     });
@@ -94,6 +103,20 @@ export class MyProfileComponent {
     this.form.get('end')?.valueChanges.subscribe(() => {
       this.form.get('start')?.updateValueAndValidity();
     });
+  }
+
+  private assignPatientHistoryToAppointments(
+    appointmentToUpdate: Appointment
+  ): void {
+    if (!appointmentToUpdate.patient_id || !appointmentToUpdate.id) return;
+    this.patientHistoryService
+      .getPatientHistoryByAppointment(
+        appointmentToUpdate.patient_id,
+        appointmentToUpdate.id
+      )
+      .subscribe((history) => {
+        appointmentToUpdate.patientHistory = history;
+      });
   }
 
   private createForm(): FormGroup {
@@ -169,11 +192,12 @@ export class MyProfileComponent {
   }
 
   downloadPatientHistory() {
-    if (!this.user?.name || !this.user?.lastname || !this.patientData) return;
-    this.patientHistoryService.downloadPatientHistory(
-      this.user?.name,
-      this.user?.lastname,
-      this.patientData
-    );
+    // TODO: hacer otro tipo de descraga
+    // if (!this.user?.name || !this.user?.lastname || !this.patientData) return;
+    // this.patientHistoryService.downloadPatientHistory(
+    //   this.user?.name,
+    //   this.user?.lastname,
+    //   this.patientData
+    // );
   }
 }

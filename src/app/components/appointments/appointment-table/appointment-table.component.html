@@ -18,16 +18,13 @@
 <h1 [@slideInFromBottom]>
   {{ currentUserRole === "ADMIN" ? "Turnos" : "Mis turnos" }}
 </h1>
-<ng-container
-  *ngIf="!appointments.length; else showAppointments"
-  [@slideInFromBottom]
->
-  <p>Todavía no hay turnos</p>
+<ng-container *ngIf="!appointments.length; else showAppointments">
+  <p [@slideInFromBottom]>Todavía no hay turnos</p>
 </ng-container>
 
-<ng-template #showAppointments [@slideInFromBottom]>
+<ng-template #showAppointments>
   <!-- filters -->
-  <form class="d-flex divSearch" role="search">
+  <form class="d-flex divSearch" role="search" [@slideInFromBottom]>
     <input
       class="form-control me-2"
       type="search"

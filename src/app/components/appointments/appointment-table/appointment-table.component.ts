@@ -6,7 +6,6 @@ import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { AppointmentService } from '../../../services/appointment.service';
 import { AuthService } from '../../../services/auth.service';
 import { UserInterface } from '../../../interfaces/user.interface';
-import { getAuth } from '@angular/fire/auth';
 import { FormsModule } from '@angular/forms';
 import { PatientHistoryService } from '../../../services/patient-history.service';
 import { FormatPatientHistoryDataPipe } from '../../../pipes/format-patient-history-data.pipe';
@@ -55,7 +54,7 @@ export class AppointmentTableComponent {
   ngOnInit(): void {
     this.spinner.show();
     this.currentUserRole = this.authService.getRole();
-    const currentUserEmail = getAuth().currentUser?.email;
+    const currentUserEmail = this.authService.getCurrentUserEmail();
 
     this.authService.getUsers().subscribe((response) => {
       this.users = response;

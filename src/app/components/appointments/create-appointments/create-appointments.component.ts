@@ -18,7 +18,6 @@ import {
 import { Appointment } from '../../../interfaces/appointment.interface';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatButtonModule } from '@angular/material/button';
-import { getAuth } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { AppointmentService } from '../../../services/appointment.service';
 import { StringToDatePipe } from '../../../pipes/string-to-date.pipe';
@@ -102,7 +101,7 @@ export class CreateAppointmentsComponent {
         ) as Patients[];
       });
     } else {
-      const email = getAuth().currentUser?.email;
+      const email = this.authService.getCurrentUserEmail();
       // get patient
       if (email) {
         this.authService.getUserByEmail(email).subscribe((response) => {

@@ -8,6 +8,12 @@
     </li>
   </ul>
   <ul>
+    <li class="listOption" *ngIf="isLogged && isAdmin" routerLink="/manageUsers">
+      <a>
+        <i class="fa fa-users" aria-hidden="true"></i>
+        <p>Usuarios</p>
+      </a>
+    </li>
     <li
       class="listOption"
       *ngIf="isLogged && isPatient"

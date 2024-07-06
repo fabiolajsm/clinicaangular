@@ -1,0 +1,13 @@
+.patientCard {
+  width: 18rem;
+}
+
+.imagen {
+  height: 15rem;
+  object-fit: contain;
+}
+.patient-cards-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import {
   Auth,
   createUserWithEmailAndPassword,
+  getAuth,
   signInWithEmailAndPassword,
   signOut,
   user,
@@ -43,6 +44,9 @@ export class AuthService {
       password
     ).then(() => {});
     return from(promise);
+  }
+  getCurrentUserEmail() {
+    return getAuth().currentUser?.email;
   }
 
   updateAdmin(adminData: UserInterface) {
