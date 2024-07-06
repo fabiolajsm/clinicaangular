@@ -22,6 +22,7 @@ import { PatientHistoryComponent } from '../patient-history/patient-history.comp
 import { PatientHistoryService } from '../../services/patient-history.service';
 import { PatientHistory } from '../../interfaces/appointment.interface';
 import jsPDF from 'jspdf';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 @Component({
   selector: 'app-my-profile',
@@ -33,6 +34,14 @@ import jsPDF from 'jspdf';
     PatientHistoryComponent,
   ],
   templateUrl: './my-profile.component.html',
+  animations: [
+    trigger('slideInFromBottom', [
+      transition(':enter', [
+        style({ transform: 'translateY(100%)' }),
+        animate('0.5s ease-out', style({ transform: 'translateY(0)' })),
+      ]),
+    ]),
+  ],
 })
 export class MyProfileComponent {
   user: UserInterface | Patients | Specialists | undefined = undefined;

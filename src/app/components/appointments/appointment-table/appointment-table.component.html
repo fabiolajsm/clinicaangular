@@ -15,12 +15,17 @@
   (click)="handleBack()"
 ></button>
 
-<h1>{{ currentUserRole === "ADMIN" ? "Turnos" : "Mis turnos" }}</h1>
-<ng-container *ngIf="!appointments.length; else showAppointments">
+<h1 [@slideInFromBottom]>
+  {{ currentUserRole === "ADMIN" ? "Turnos" : "Mis turnos" }}
+</h1>
+<ng-container
+  *ngIf="!appointments.length; else showAppointments"
+  [@slideInFromBottom]
+>
   <p>Todavía no hay turnos</p>
 </ng-container>
 
-<ng-template #showAppointments>
+<ng-template #showAppointments [@slideInFromBottom]>
   <!-- filters -->
   <form class="d-flex divSearch" role="search">
     <input

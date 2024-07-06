@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { PatientHistoryService } from '../../../services/patient-history.service';
 import { FormatPatientHistoryDataPipe } from '../../../pipes/format-patient-history-data.pipe';
 
+import { animate, style, transition, trigger } from '@angular/animations';
 @Component({
   selector: 'app-appointment-table',
   standalone: true,
@@ -23,6 +24,14 @@ import { FormatPatientHistoryDataPipe } from '../../../pipes/format-patient-hist
   ],
   templateUrl: './appointment-table.component.html',
   styleUrl: './appointment-table.component.scss',
+  animations: [
+    trigger('slideInFromBottom', [
+      transition(':enter', [
+        style({ transform: 'translateY(100%)' }),
+        animate('0.5s ease-out', style({ transform: 'translateY(0)' })),
+      ]),
+    ]),
+  ],
 })
 export class AppointmentTableComponent {
   appointments: Appointment[] = [];

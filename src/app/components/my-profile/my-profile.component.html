@@ -12,9 +12,10 @@
   class="fa fa-arrow-left icon-button"
   aria-hidden="true"
   (click)="handleBack()"
+  [@slideInFromBottom]
 ></button>
 
-<div class="container py-5">
+<div class="container py-5" [@slideInFromBottom]>
   <ng-container *ngIf="user; else emptyDetail">
     <div class="row">
       <div class="col-lg-4">
