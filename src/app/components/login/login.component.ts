@@ -19,6 +19,7 @@ import {
 import { FirebaseError } from 'firebase/app';
 import { authErrors } from '../../services/auth.errors';
 import { getAuth } from '@angular/fire/auth';
+import { SectionTitleDirective } from '../../directives/section-title.directive';
 
 @Component({
   selector: 'app-login',
@@ -29,6 +30,7 @@ import { getAuth } from '@angular/fire/auth';
     RouterModule,
     SweetAlert2Module,
     NgxSpinnerModule,
+    SectionTitleDirective
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',

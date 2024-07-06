@@ -63,7 +63,6 @@ export class MyProfileComponent {
     this.form = this.createForm();
 
     this.email = this.authService.getCurrentUserEmail();
-    console.log(this.email, 'acaaa email');
 
     if (!this.email) return;
     this.spinner.show();

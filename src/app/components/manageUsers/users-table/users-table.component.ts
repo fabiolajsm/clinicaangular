@@ -5,11 +5,18 @@ import { Router, RouterModule } from '@angular/router';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { AuthService } from '../../../services/auth.service';
+import { SectionTitleDirective } from '../../../directives/section-title.directive';
 
 @Component({
   selector: 'app-users-table',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, NgxSpinnerModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    NgxSpinnerModule,
+    SectionTitleDirective,
+  ],
   templateUrl: './users-table.component.html',
 })
 export class UsersTableComponent {

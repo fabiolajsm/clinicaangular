@@ -11,6 +11,8 @@ import { PatientHistoryService } from '../../../services/patient-history.service
 import { FormatPatientHistoryDataPipe } from '../../../pipes/format-patient-history-data.pipe';
 
 import { animate, style, transition, trigger } from '@angular/animations';
+import { SectionTitleDirective } from '../../../directives/section-title.directive';
+import { HighlightStatusDirective } from '../../../directives/highlight-status.directive';
 @Component({
   selector: 'app-appointment-table',
   standalone: true,
@@ -20,6 +22,8 @@ import { animate, style, transition, trigger } from '@angular/animations';
     NgxSpinnerModule,
     FormsModule,
     FormatPatientHistoryDataPipe,
+    SectionTitleDirective,
+    HighlightStatusDirective,
   ],
   templateUrl: './appointment-table.component.html',
   styleUrl: './appointment-table.component.scss',

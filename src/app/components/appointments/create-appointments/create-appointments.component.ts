@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { AppointmentService } from '../../../services/appointment.service';
 import { StringToDatePipe } from '../../../pipes/string-to-date.pipe';
 import { FormatDatePipe } from '../../../pipes/format-date.pipe';
+import { NotFoundImageDirective } from '../../../directives/not-found-image.directive';
 
 @Component({
   selector: 'app-create-appointments',
@@ -33,6 +34,7 @@ import { FormatDatePipe } from '../../../pipes/format-date.pipe';
     NgxSpinnerModule,
     MatButtonModule,
     MatStepperModule,
+    NotFoundImageDirective
   ],
   templateUrl: './create-appointments.component.html',
   styleUrl: './create-appointments.component.scss',
@@ -177,9 +179,7 @@ export class CreateAppointmentsComponent {
     const matchedSpecialty = this.specialtiesOptions.find(
       (opt) => opt.name === specialtyName
     );
-    return matchedSpecialty
-      ? matchedSpecialty.img
-      : 'https://firebasestorage.googleapis.com/v0/b/clinicaangular-edc0f.appspot.com/o/generica.jpeg?alt=media&token=35dc22a6-b5c1-4cb0-b576-5ed2934fbb74';
+    return matchedSpecialty?.img;
   }
 
   loadDays() {

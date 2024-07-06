@@ -14,7 +14,7 @@
     aria-hidden="true"
     (click)="handleBack()"
   ></button>
-  <h1 *ngIf="!formSelected">
+  <h1 *ngIf="!formSelected" appSectionTitle>
     Selecciona el tipo de perfil que deseas registrar
   </h1>
   <div class="selectForm" *ngIf="!formSelected">

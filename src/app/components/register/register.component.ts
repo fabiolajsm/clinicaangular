@@ -26,6 +26,7 @@ import { SpecialtiesService } from '../../services/specialties.service';
 import { HealthInsuranceService } from '../../services/health-insurance.service';
 import { HealthInsurance } from '../../interfaces/healthInsurance.interface';
 import { RecaptchaModule } from 'ng-recaptcha';
+import { SectionTitleDirective } from '../../directives/section-title.directive';
 
 @Component({
   selector: 'app-register',
@@ -37,6 +38,7 @@ import { RecaptchaModule } from 'ng-recaptcha';
     SweetAlert2Module,
     NgxSpinnerModule,
     RecaptchaModule,
+    SectionTitleDirective
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',

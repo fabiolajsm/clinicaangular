@@ -21,10 +21,6 @@ export class PatientHistoryComponent {
 
   constructor(private authService: AuthService) {}
 
-  ngOnChanges(){
-    console.log(this.appointments, 'ajajajajgjudhgjudy');
-    
-  }
   ngOnInit() {
     this.role = this.authService.getRole() as Role;
   }

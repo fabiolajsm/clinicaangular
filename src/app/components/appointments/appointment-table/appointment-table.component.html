@@ -15,7 +15,7 @@
   (click)="handleBack()"
 ></button>
 
-<h1 [@slideInFromBottom]>
+<h1 [@slideInFromBottom] appSectionTitle>
   {{ currentUserRole === "ADMIN" ? "Turnos" : "Mis turnos" }}
 </h1>
 <ng-container *ngIf="!appointments.length; else showAppointments">
@@ -113,7 +113,7 @@
         >
           {{ item.patient_name }}
         </td>
-        <td>{{ item.status }}</td>
+        <td [appHighlightStatus]="item.status">{{ item.status }}</td>
         <ng-container *ngIf="currentUserRole !== 'ADMIN'">
           <td>
             {{

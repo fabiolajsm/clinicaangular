@@ -9,11 +9,17 @@ import { AppointmentService } from '../../services/appointment.service';
 import { Subject, Subscription, takeUntil } from 'rxjs';
 import { PatientHistoryComponent } from '../patient-history/patient-history.component';
 import { PatientHistoryService } from '../../services/patient-history.service';
+import { SectionTitleDirective } from '../../directives/section-title.directive';
 
 @Component({
   selector: 'app-my-patients',
   standalone: true,
-  imports: [CommonModule, NgxSpinnerModule, PatientHistoryComponent],
+  imports: [
+    CommonModule,
+    NgxSpinnerModule,
+    PatientHistoryComponent,
+    SectionTitleDirective,
+  ],
   templateUrl: './my-patients.component.html',
   styleUrl: './my-patients.component.scss',
 })
@@ -77,8 +83,10 @@ export class MyPatientsComponent {
             .pipe(takeUntil(this.unsubscribe$))
             .subscribe((appointments: Appointment[]) => {
               if (!appointments.length) return;
-              this.patientsWithAppointments.push(patient);
-              this.appointments = appointments;
+              if (!this.patientsWithAppointments.includes(patient)) {
+                this.patientsWithAppointments.push(patient);
+                this.appointments = appointments;
+              }
             });
         });
         this.spinner.hide();
