@@ -15,7 +15,6 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './patient-history.component.scss',
 })
 export class PatientHistoryComponent {
-  @Input() showLastThreeAppointments: boolean | undefined;
   @Input() appointments: Appointment[] | undefined;
   role: Role | undefined;
 
@@ -29,10 +28,6 @@ export class PatientHistoryComponent {
       this.appointments.sort((a, b) => {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
-
-      if (this.showLastThreeAppointments) {
-        this.appointments = this.appointments.slice(0, 3);
-      }
     }
   }
 

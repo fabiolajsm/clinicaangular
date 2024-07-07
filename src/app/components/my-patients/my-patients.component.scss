@@ -1,13 +1,12 @@
 .patientCard {
-  width: 18rem;
+  width: 15rem;
 }
-
 .imagen {
-  height: 15rem;
+  height: 10rem;
   object-fit: contain;
 }
 .patient-cards-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
