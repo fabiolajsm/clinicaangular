@@ -15,197 +15,126 @@
     (click)="handleBack()"
   ></button>
 
-  <mat-stepper
-    [linear]="true"
-    #stepper
-    (selectionChange)="handleStepperSelectionChange($event)"
+  <form
+    [formGroup]="form"
+    (ngSubmit)="handleSubmit()"
+    class="createFormContainer"
   >
-    <!-- Step 1 -->
-    <mat-step [completed]="form.valid" [editable]="!hasCreatedAppointment">
-      <ng-template matStepLabel>Solicitar turno</ng-template>
-      <form [formGroup]="form">
-        <!-- if is admin choose patient -->
-        <ng-container *ngIf="role === 'ADMIN' && patients">
-          <select
-            class="form-select selectPatient"
-            aria-label="patient select"
-            formControlName="patientId"
-            (change)="handleSelectPatient($event)"
-          >
-            <option value="" selected>Selecciona un paciente</option>
-            <option *ngFor="let item of patients" [value]="item.id">
-              {{ item.name }} {{ item.lastname }}
-            </option>
-          </select>
-          <p
-            class="error-msg"
-            *ngIf="
-              form.get('patientId')?.invalid &&
-              (form.get('patientId')?.dirty || form.get('patientId')?.touched)
-            "
-          >
-            Debe seleccionar un paciente
-          </p>
-        </ng-container>
-        <!-- choose professional -->
-        <div
-          class="roundedButtons"
-          *ngIf="professionals && professionals.length > 0"
-        >
-          <div *ngFor="let professional of professionals">
-            <p class="professionalName">
-              {{ professional.name }} {{ professional.lastname }}
-            </p>
-            <button
-              type="button"
-              (click)="handleSelectProfessional(professional.email)"
-            >
-              <img [src]="professional.profilePicture" alt="Foto de perfil" />
-            </button>
-          </div>
-        </div>
-        <!-- choose specialty -->
-        <div *ngIf="professionalSelected">
-          <p class="selected-text">
-            Especialidades de {{ professionalSelected.name }}
-            {{ professionalSelected.lastname }}
-          </p>
-          <div class="specialty-container">
-            <button
-              type="button"
-              class="specialty-button"
-              *ngFor="let specialty of professionalSelected.specialties"
-              (click)="handleSelectSpecialty(specialty)"
-            >
-              <p class="specialty-name">{{ specialty }}</p>
-              <img
-                class="specialty-image"
-                [src]="getSpecialtyImg(specialty)"
-                alt="Especialidad"
-                appNotFoundImage
-              />
-            </button>
-          </div>
-          <p class="text-value" *ngIf="form.get('specialty')?.value">
-            <span>Especialidad seleccionada:</span>
-            {{ form.get("specialty")?.value }}
-          </p>
-        </div>
-
-        <h2 *ngIf="hasToShowAppointments" class="available-days-text">
-          Turnos disponibles
-        </h2>
-
-        <div
-          class="days-container"
-          *ngIf="availableDays.length > 0 && hasToShowAppointments"
-        >
-          <button
-            *ngFor="let day of availableDays"
-            (click)="selectDay(day)"
-            class="day-button"
-          >
-            {{ weekDays[day.date.getDay()] }}
-            {{ day.date | date : "yyyy-MM-dd" }}
-          </button>
-        </div>
-
-        <div class="selected-day-container" *ngIf="selectedDay">
-          <p class="text-value">
-            <span>Fecha seleccionada:</span>
-            {{ selectedDay.date | date : "yyyy-MM-dd" }}
-          </p>
-          <ul *ngIf="selectedDay.availableTimes.length > 0" class="time-list">
-            <li
-              *ngFor="let time of selectedDay.availableTimes"
-              class="time-item"
-            >
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="handleSelectTime(time.startTime, time.endTime)"
-              >
-                {{ time.startTime }} - {{ time.endTime }}
-              </button>
-            </li>
-          </ul>
-          <p class="text-value" *ngIf="selectTime">
-            <span>Horario seleccionado:</span>
-            {{ selectTime.startTime }} - {{ selectTime.endTime }} hs
-          </p>
-          <div *ngIf="selectedDay.availableTimes.length === 0" class="no-times">
-            <p>No hay turnos disponibles para este día.</p>
-          </div>
-        </div>
-        <div>
-          <button
-            mat-button
-            matStepperNext
-            (click)="handleSubmit()"
-            [disabled]="form.invalid"
-          >
-            Continuar
-          </button>
-        </div>
-      </form>
-    </mat-step>
-
-    <!-- Step 2 -->
-    <mat-step>
-      <ng-template matStepLabel>Confirmar</ng-template>
-      <div *ngIf="appointmentRequested" class="appointmentRequested">
-        <h3>Confirmación del turno</h3>
-        <p>
-          <span>Especialista:</span>
-          {{ appointmentRequested.professional_name }}
-        </p>
-        <p><span>Especialidad:</span> {{ appointmentRequested.specialty }}</p>
-        <p>
-          <span>Fecha:</span> {{ appointmentRequested.day }},
-          {{ appointmentRequested.date }}
-        </p>
-        <p>
-          <span>Horario:</span> {{ appointmentRequested.start_time }} -
-          {{ appointmentRequested.end_time }} hs
-        </p>
-        <p *ngIf="role === 'ADMIN'">
-          <span> Paciente:</span>
-          {{ appointmentRequested.patient_name }}
-        </p>
-      </div>
-      <div *ngIf="!appointmentRequested">
-        <p>No se han seleccionado datos para confirmar aún.</p>
-      </div>
-      <div>
-        <button
-          mat-button
-          matStepperPrevious
-          [disabled]="hasConfirm && !hasCreatedAppointment"
-        >
-          Atrás
-        </button>
-        <button
-          mat-button
-          matStepperNext
-          (click)="handleCreateRequestAppointment()"
-          [disabled]="!appointmentRequested"
-        >
-          Finalizar
-        </button>
-      </div>
-    </mat-step>
-    <!-- Step 3 -->
-    <mat-step>
-      <ng-template matStepLabel>Ya tienes turno</ng-template>
-      <p>
-        ¡Se ha solicitado el turno exitosamente! Puedes ver mas información en
-        la sección de Mis turnos.
+    <h1>Elige un turno</h1>
+    <!-- if is admin choose patient -->
+    <ng-container *ngIf="role === 'ADMIN' && patients">
+      <select
+        class="form-select selectPatient"
+        aria-label="patient select"
+        formControlName="patientId"
+        (change)="handleSelectPatient($event)"
+      >
+        <option value="" selected>Selecciona un paciente</option>
+        <option *ngFor="let item of patients" [value]="item.id">
+          {{ item.name }} {{ item.lastname }}
+        </option>
+      </select>
+      <p
+        class="error-msg"
+        *ngIf="
+          form.get('patientId')?.invalid &&
+          (form.get('patientId')?.dirty || form.get('patientId')?.touched)
+        "
+      >
+        Debe seleccionar un paciente
       </p>
-      <div>
-        <button mat-button (click)="stepper.reset()">
-          Solicitar otro turno
+    </ng-container>
+    <!-- choose professional -->
+    <div
+      class="roundedButtons"
+      *ngIf="professionals && professionals.length > 0"
+    >
+      <div *ngFor="let professional of professionals">
+        <p class="professionalName">
+          {{ professional.name }} {{ professional.lastname }}
+        </p>
+        <button
+          type="button"
+          (click)="handleSelectProfessional(professional.email)"
+        >
+          <img [src]="professional.profilePicture" alt="Foto de perfil" />
         </button>
       </div>
-    </mat-step>
-  </mat-stepper>
+    </div>
+    <!-- choose specialty -->
+    <div *ngIf="professionalSelected">
+      <p class="selected-text">
+        Especialidades de {{ professionalSelected.name }}
+        {{ professionalSelected.lastname }}
+      </p>
+      <div class="specialty-container">
+        <button
+          type="button"
+          class="specialty-button"
+          *ngFor="let specialty of professionalSelected.specialties"
+          (click)="handleSelectSpecialty(specialty)"
+        >
+          <p class="specialty-name">{{ specialty }}</p>
+          <img
+            class="specialty-image"
+            [src]="getSpecialtyImg(specialty)"
+            alt="Especialidad"
+            appNotFoundImage
+          />
+        </button>
+      </div>
+      <p class="text-value" *ngIf="form.get('specialty')?.value">
+        <span>Especialidad seleccionada:</span>
+        {{ form.get("specialty")?.value }}
+      </p>
+    </div>
+
+    <h2 *ngIf="form.get('specialty')?.value" class="available-days-text">
+      Turnos disponibles
+    </h2>
+
+    <div
+      class="days-container"
+      *ngIf="availableDays.length > 0 && form.get('specialty')?.value"
+    >
+      <button
+        *ngFor="let day of availableDays"
+        (click)="selectDay(day)"
+        class="day-button"
+      >
+        {{ weekDays[day.date.getDay()] }}
+        {{ day.date | date : "yyyy-MM-dd" }}
+      </button>
+    </div>
+
+    <div class="selected-day-container" *ngIf="selectedDay">
+      <p class="text-value">
+        <span>Fecha seleccionada:</span>
+        {{ selectedDay.date | date : "yyyy-MM-dd" }}
+      </p>
+      <ul *ngIf="selectedDay.availableTimes.length > 0" class="time-list">
+        <li *ngFor="let time of selectedDay.availableTimes" class="time-item">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="handleSelectTime(time.startTime, time.endTime)"
+          >
+            {{ time.startTime }} - {{ time.endTime }}
+          </button>
+        </li>
+      </ul>
+      <p class="text-value" *ngIf="selectTime">
+        <span>Horario seleccionado:</span>
+        {{ selectTime.startTime }} - {{ selectTime.endTime }} hs
+      </p>
+      <div *ngIf="selectedDay.availableTimes.length === 0" class="no-times">
+        <p>No hay turnos disponibles para este día.</p>
+      </div>
+    </div>
+    <div>
+      <button class="btn continueBtn" type="submit" [disabled]="form.invalid">
+        Continuar
+      </button>
+    </div>
+  </form>
 </div>

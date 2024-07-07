@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, SimpleChanges } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {
@@ -24,6 +24,8 @@ import { StringToDatePipe } from '../../../pipes/string-to-date.pipe';
 import { FormatDatePipe } from '../../../pipes/format-date.pipe';
 import { NotFoundImageDirective } from '../../../directives/not-found-image.directive';
 import { Subscription } from 'rxjs';
+import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-create-appointments',
@@ -36,6 +38,7 @@ import { Subscription } from 'rxjs';
     MatButtonModule,
     MatStepperModule,
     NotFoundImageDirective,
+    SweetAlert2Module,
   ],
   templateUrl: './create-appointments.component.html',
   styleUrl: './create-appointments.component.scss',
@@ -57,7 +60,6 @@ export class CreateAppointmentsComponent {
   professionalSelected: Specialists | undefined = undefined;
   professionalSchedule: Schedules | undefined = undefined;
   professionalAppointmentAvailable: ScheduleTime | undefined = undefined;
-  hasToShowAppointments: boolean = false;
 
   weekDays = [
     'Domingo',
@@ -75,10 +77,7 @@ export class CreateAppointmentsComponent {
   selectTime: ScheduleTime | undefined = undefined;
 
   appointmentRequested: Appointment | undefined = undefined;
-  hasConfirm: boolean | undefined = undefined;
-  hasCreatedAppointment: boolean | undefined = undefined;
   patientName: string | undefined = undefined;
-
   role: Role | undefined = undefined;
   patients: Patients[] | undefined = undefined;
   private subscriptions: Subscription[] = [];
@@ -97,21 +96,35 @@ export class CreateAppointmentsComponent {
   ngOnInit() {
     this.spinner.show();
     this.role = this.authService.getRole() as Role;
+
+    const getSpecialtiesSub = this.specialtiesService
+      .getSpecialties()
+      .subscribe((data: Specialties[]) => {
+        this.specialtiesOptions = data;
+      });
+    this.subscriptions.push(getSpecialtiesSub);
+
+    const getSchedulesSub = this.specialtiesService
+      .getSchedules()
+      .subscribe((data: Schedules[]) => {
+        this.schedules = data;
+        this.loadProfessionals();
+      });
+    this.subscriptions.push(getSchedulesSub);
+
     if (this.role === 'ADMIN') {
-      // get patients
-      const usersSubscription = this.authService
+      const getUsersSub = this.authService
         .getUsers()
         .subscribe((response: UserInterface[]) => {
           this.patients = response.filter(
             (item) => item.role === 'PACIENTE'
           ) as Patients[];
         });
-      this.subscriptions.push(usersSubscription);
+      this.subscriptions.push(getUsersSub);
     } else {
       const email = this.authService.getCurrentUserEmail();
-      // get patient
       if (email) {
-        const getUserByEmailSubs = this.authService
+        const getUserByEmailSub = this.authService
           .getUserByEmail(email)
           .subscribe((response) => {
             if (response?.id) {
@@ -119,49 +132,52 @@ export class CreateAppointmentsComponent {
             }
             this.patientName = `${response?.name} ${response?.lastname}`;
           });
-        this.subscriptions.push(getUserByEmailSubs);
+        this.subscriptions.push(getUserByEmailSub);
       }
     }
-    // Get specialties
-    const getProfessionalsSubs = this.specialtiesService
-      .getSpecialties()
-      .subscribe((data: Specialties[]) => {
-        this.specialtiesOptions = data;
-      });
-
-    this.subscriptions.push(getProfessionalsSubs);
-    // Get schedules
-    const schedulesSubs = this.specialtiesService
-      .getSchedules()
-      .subscribe((data: Schedules[]) => {
-        this.schedules = data;
-        // Filter professionals by loaded schedules
-        this.authService.getUsers().subscribe((response: UserInterface[]) => {
-          this.professionals = response.filter((item) => {
-            if (
-              item.role === 'ESPECIALISTA' &&
-              (item as Specialists).profileEnabled
-            ) {
-              // Check if the user has at least one schedule loaded
-              return this.schedules?.some(
-                (schedule) => schedule.user_id === item.id
-              );
-            }
-            return false;
-          }) as Specialists[];
-
-          this.spinner.hide();
-        });
-        this.subscriptions.push(schedulesSubs);
-      });
   }
 
   ngOnDestroy() {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
-  handleSelectProfessional(email: string) {
+  loadProfessionals() {
+    if (!this.schedules) return;
+
+    const professionals = this.authService
+      .getUsers()
+      .subscribe((response: UserInterface[]) => {
+        this.professionals = response.filter((item) => {
+          if (
+            item.role === 'ESPECIALISTA' &&
+            (item as Specialists).profileEnabled
+          ) {
+            return this.schedules?.some(
+              (schedule) => schedule.user_id === item.id
+            );
+          }
+          return false;
+        }) as Specialists[];
+        this.spinner.hide();
+      });
+    this.subscriptions.push(professionals);
+  }
+
+  resetProfesional() {
     this.form.get('professional')?.setValue(null);
+    this.form.get('specialty')?.setValue(null);
+    this.availableDays = [];
+    this.datesTaken = [];
+    this.selectedDay = undefined;
+    this.selectTime = undefined;
+    this.professionalSelected = undefined;
+    this.professionalSchedule = undefined;
+    this.professionalAppointmentAvailable = undefined;
+  }
+
+  handleSelectProfessional(email: string) {
+    this.resetProfesional();
+
     if (!email) return;
     const itemSelected = this.professionals.find(
       (item) => item.email === email
@@ -175,12 +191,13 @@ export class CreateAppointmentsComponent {
     this.professionalSchedule = currentSchedule;
 
     if (this.professionalSelected.id) {
-      this.appointmentService
+      const appSub = this.appointmentService
         .getAppointmentsBySpecialist(this.professionalSelected?.id)
         .subscribe((response) => {
           this.datesTaken = response;
           this.loadDays();
         });
+      this.subscriptions.push(appSub);
     }
   }
 
@@ -188,7 +205,6 @@ export class CreateAppointmentsComponent {
     this.form.get('specialty')?.setValue(null);
     if (!specialty) return;
     this.form.get('specialty')?.setValue(specialty);
-    this.hasToShowAppointments = true;
   }
 
   getSpecialtyImg(specialtyName: string): string | undefined {
@@ -263,13 +279,6 @@ export class CreateAppointmentsComponent {
     return taken;
   }
 
-  convertStringTimeToDate(time: string): Date {
-    const timeParts = time.split(':');
-    const hour = parseInt(timeParts[0], 10);
-    const minutes = parseInt(timeParts[1], 10);
-    return new Date(0, 0, 0, hour, minutes);
-  }
-
   selectDay(day: { date: Date; availableTimes: ScheduleTime[] }) {
     if (this.selectedDay !== day || !this.selectedDay) {
       this.selectTime = undefined;
@@ -294,6 +303,34 @@ export class CreateAppointmentsComponent {
     this.form.get('end_time')?.setValue(end);
   }
 
+  handleSelectPatient(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const value = inputElement.value;
+    if (!value) return;
+    const patient = this.patients?.find((item) => item.id === value);
+    if (patient) {
+      this.patientName = `${patient.name} ${patient.lastname}`;
+    }
+  }
+
+  handleResetFlags() {
+    // Clean other states
+    this.professionalSelected = undefined;
+    this.professionalSchedule = undefined;
+    this.professionalAppointmentAvailable = undefined;
+    this.availableDays = [];
+    this.datesTaken = [];
+    this.selectedDay = undefined;
+    this.selectTime = undefined;
+    this.appointmentRequested = undefined;
+  }
+
+  handleBack() {
+    this.router.navigate([this.role === 'ADMIN' ? '/appointment' : '/']);
+    this.handleResetFlags();
+    this.form.reset();
+  }
+
   handleSubmit() {
     if (!this.form.valid) return;
     const patient = this.form.get('patientId')?.value;
@@ -310,65 +347,76 @@ export class CreateAppointmentsComponent {
         patient_id: patient,
         patient_name: this.patientName,
         status: 'PENDIENTE',
-        date: this.form.get('date')?.value ?? '' ?? '',
+        date: this.form.get('date')?.value ?? '',
       };
-      this.hasConfirm = false;
       this.appointmentRequested = requestData;
+
+      Swal.fire({
+        title: 'Confirmar turno',
+        html: `
+          <p><strong>Especialista:</strong> ${requestData.professional_name}</p>
+          <p><strong>Especialidad:</strong> ${requestData.specialty}</p>
+          <p><strong>Fecha:</strong> ${requestData.day}, ${requestData.date}</p>
+          <p><strong>Horario:</strong> ${requestData.start_time} - ${
+          requestData.end_time
+        } hs</p>
+          ${
+            this.role === 'ADMIN'
+              ? `<p><strong>Paciente:</strong> ${requestData.patient_name}</p>`
+              : ''
+          }
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar',
+        showLoaderOnConfirm: true,
+        preConfirm: async () => {
+          try {
+            await this.handleCreateRequestAppointment();
+          } catch (error) {
+            Swal.showValidationMessage(`Error: ${error}`);
+          }
+        },
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.cancel) {
+          this.appointmentRequested = undefined;
+        }
+      });
     }
   }
+  async handleCreateRequestAppointment() {
+    if (!this.appointmentRequested) return false;
 
-  handleSelectPatient(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    const value = inputElement.value;
-    if (!value) return;
-    const patient = this.patients?.find((item) => item.id === value);
-    if (patient) {
-      this.patientName = `${patient.name} ${patient.lastname}`;
-    }
-  }
-
-  handleCreateRequestAppointment() {
-    if (!this.appointmentRequested) return;
-    const createAppPromise: Promise<boolean> =
-      this.appointmentService.createAppointment(this.appointmentRequested);
-    createAppPromise.then((res) => {
-      this.hasCreatedAppointment = res;
-      this.hasConfirm = res;
-    });
-  }
-
-  handleStepperSelectionChange(event: any) {
-    if (event.previouslySelectedIndex === 2 && event.selectedIndex === 0) {
-      this.handleReset();
-      // Preserve patientId if the role is PACIENTE
-      if (this.role === 'PACIENTE') {
-        const patientIdValue = this.form.get('patientId')?.value;
-        this.form.reset();
-        this.form.get('patientId')?.setValue(patientIdValue ?? '');
+    try {
+      const success = await this.appointmentService.createAppointment(
+        this.appointmentRequested
+      );
+      if (success) {
+        Swal.fire({
+          title: '¡Turno creado!',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 7000,
+        });
+        this.router.navigate(['appointment']);
       } else {
-        this.form.reset();
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo crear el turno.',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
       }
+      return success;
+    } catch (error) {
+      console.error('Error al crear el turno:', error);
+      Swal.fire({
+        title: 'Error',
+        text: 'No se pudo crear el turno.',
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+      return false;
     }
-  }
-
-  handleReset() {
-    // Clean other states
-    this.professionalSelected = undefined;
-    this.professionalSchedule = undefined;
-    this.professionalAppointmentAvailable = undefined;
-    this.availableDays = [];
-    this.hasToShowAppointments = false;
-    this.datesTaken = [];
-    this.selectedDay = undefined;
-    this.selectTime = undefined;
-    this.appointmentRequested = undefined;
-    this.hasConfirm = false;
-    this.hasCreatedAppointment = false;
-  }
-
-  handleBack() {
-    this.router.navigate([this.role === 'ADMIN' ? '/appointment' : '/']);
-    this.handleReset();
-    this.form.reset();
   }
 }
