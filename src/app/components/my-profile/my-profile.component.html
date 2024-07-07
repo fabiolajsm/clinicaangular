@@ -114,7 +114,8 @@
                   <button
                     type="button"
                     class="btn btn-secondary"
-                    (click)="downloadPatientHistory()"
+                    data-bs-toggle="modal"
+                    data-bs-target="#exampleModal"
                   >
                     Descargar historial clínico
                   </button>
@@ -222,4 +223,79 @@
   <ng-template #emptyDetail>
     <p>No hay datos para mostrar</p>
   </ng-template>
+
+  <!-- Modal download -->
+  <div
+    class="modal fade"
+    id="exampleModal"
+    tabindex="-1"
+    aria-labelledby="downloadModal"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="downloadModal">
+            Descargar historial clínico
+          </h1>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form
+            [formGroup]="formDownloadHistory"
+            (ngSubmit)="handleDownloadHistory()"
+            *ngIf="specialtiesOptions.length"
+          >
+            <p class="actionNote">
+              Se va a descargar el historial clínico de la especialidad
+              seleccionada
+            </p>
+            <select
+              class="form-select"
+              aria-label="Seleccionar una especialidad"
+              aria-placeholder="Seleccione una especialidad"
+              formControlName="specialty"
+            >
+              <option selected disabled value="">
+                Seleccione una especialidad
+              </option>
+              <option
+                *ngFor="let option of specialtiesOptions"
+                [value]="option.id"
+              >
+                {{ option.name }}
+              </option>
+            </select>
+            <p
+              *ngIf="
+                formDownloadHistory.get('specialty')?.invalid &&
+                formDownloadHistory.get('specialty')?.touched
+              "
+              class="error-msg"
+            >
+              Tiene que seleccionar una especialidad
+            </p>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" data-bs-dismiss="modal">
+            Cerrar
+          </button>
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            [disabled]="formDownloadHistory.get('specialty')?.invalid"
+            (click)="handleDownloadHistory()"
+          >
+            Descargar historial
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

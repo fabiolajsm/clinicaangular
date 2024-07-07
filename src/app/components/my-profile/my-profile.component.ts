@@ -9,7 +9,7 @@ import {
 } from '../../interfaces/user.interface';
 import { SpecialtiesService } from '../../services/specialties.service';
 import { Router } from '@angular/router';
-import { Schedules } from '../../interfaces/specialties.interface';
+import { Schedules, Specialties } from '../../interfaces/specialties.interface';
 import {
   AbstractControl,
   FormControl,
@@ -25,6 +25,7 @@ import {
 } from '../../interfaces/appointment.interface';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { AppointmentService } from '../../services/appointment.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-my-profile',
@@ -50,7 +51,11 @@ export class MyProfileComponent {
   email: string | null | undefined = null;
   schedules: Schedules | null = null;
   form: FormGroup;
+  formDownloadHistory: FormGroup;
   appointments: Appointment[] | undefined;
+  specialtiesOptions: Specialties[] = [];
+
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private router: Router,
@@ -60,39 +65,58 @@ export class MyProfileComponent {
     private patientHistoryService: PatientHistoryService,
     private appointmentService: AppointmentService
   ) {
-    this.form = this.createForm();
+    this.form = new FormGroup({
+      start: new FormControl('', [Validators.required]),
+      end: new FormControl('', [Validators.required, this.endDateValidator]),
+    });
+    this.formDownloadHistory = new FormGroup({
+      specialty: new FormControl('', [Validators.required]),
+    });
 
     this.email = this.authService.getCurrentUserEmail();
-
     if (!this.email) return;
     this.spinner.show();
-    this.authService.getUserByEmail(this.email).subscribe((currentUserData) => {
-      this.user = currentUserData;
-      if (this.user?.role === 'ESPECIALISTA') {
-        this.specialtiesService
-          .getSchedules()
-          .subscribe((data: Schedules[]) => {
-            this.schedules = data.filter(
-              (item) => item.user_id === this.user?.id
-            )[0];
-          });
-      }
-      if (this.user?.role === 'PACIENTE' && this.user.id) {
-        this.appointmentService.getAppointments().subscribe((response) => {
-          this.appointments = response.filter(
-            (item) =>
-              item.status === 'REALIZADO' && item.patient_id === this.user?.id
-          );
-
-          if (this.appointments) {
-            this.appointments.forEach((appointment) => {
-              this.assignPatientHistoryToAppointments(appointment);
+    const subGetUser = this.authService
+      .getUserByEmail(this.email)
+      .subscribe((currentUserData) => {
+        this.user = currentUserData;
+        if (this.user?.role === 'ESPECIALISTA') {
+          this.specialtiesService
+            .getSchedules()
+            .subscribe((data: Schedules[]) => {
+              this.schedules = data.filter(
+                (item) => item.user_id === this.user?.id
+              )[0];
             });
-          }
-        });
-      }
-      this.spinner.hide();
-    });
+        }
+        if (this.user?.role === 'PACIENTE' && this.user.id) {
+          this.appointmentService.getAppointments().subscribe((response) => {
+            this.appointments = response.filter(
+              (item) =>
+                item.status === 'REALIZADO' && item.patient_id === this.user?.id
+            );
+
+            if (this.appointments) {
+              this.appointments.forEach((appointment) => {
+                this.assignPatientHistoryToAppointments(appointment);
+              });
+            }
+          });
+        }
+      });
+
+    const getSpecialtiesSub = this.specialtiesService
+      .getSpecialties()
+      .subscribe((data: Specialties[]) => {
+        this.specialtiesOptions = data;
+        this.spinner.hide();
+      });
+    this.subscriptions.push(getSpecialtiesSub);
+    this.subscriptions.push(subGetUser);
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   ngOnChanges() {
@@ -116,13 +140,6 @@ export class MyProfileComponent {
       .subscribe((history) => {
         appointmentToUpdate.patientHistory = history;
       });
-  }
-
-  private createForm(): FormGroup {
-    return new FormGroup({
-      start: new FormControl('', [Validators.required]),
-      end: new FormControl('', [Validators.required, this.endDateValidator]),
-    });
   }
 
   endDateValidator(
@@ -188,6 +205,13 @@ export class MyProfileComponent {
 
   handleBack() {
     this.router.navigate(['/']);
+  }
+
+  handleDownloadHistory() {
+    if (this.formDownloadHistory.valid) {
+      const specialty = this.formDownloadHistory.get('specialty')?.value;
+      console.log(specialty, 'especialidad');
+    }
   }
 
   downloadPatientHistory() {
