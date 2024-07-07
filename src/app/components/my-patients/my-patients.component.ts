@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Appointment } from '../../interfaces/appointment.interface';
 import { AppointmentService } from '../../services/appointment.service';
-import { Subject, Subscription, switchMap, takeUntil } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { PatientHistoryComponent } from '../patient-history/patient-history.component';
 import { PatientHistoryService } from '../../services/patient-history.service';
 import { SectionTitleDirective } from '../../directives/section-title.directive';
@@ -82,7 +82,15 @@ export class MyPatientsComponent {
             if (!existingPatient) {
               this.patientsWithAppointments.push(patient);
             }
-            this.appointments.push(...res);
+
+            const newAppointments = res.filter((newAppointment) => {
+              return !this.appointments.some(
+                (existingAppointment) =>
+                  existingAppointment.id === newAppointment.id
+              );
+            });
+
+            this.appointments.push(...newAppointments);
           }
         });
     });
