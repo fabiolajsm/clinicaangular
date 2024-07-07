@@ -56,12 +56,12 @@
       <p *ngIf="errorMessage && errorMessage.length > 0" class="error-msg">
         Error al Iniciar sesión: {{ errorMessage }}
       </p>
-      <button type="submit" class="btn">Login</button>
+      <button type="submit" class="btn" [disabled]="form.invalid">Login</button>
     </form>
 
     <h2 class="quickAccessText">Acceso rápido</h2>
-    <div class="roundedButtons" *ngIf="users && users.length > 0">
-      <div *ngFor="let user of users">
+    <div class="roundedButtons" *ngIf="usersQA && usersQA.length > 0">
+      <div *ngFor="let user of usersQA">
         <button type="button" (click)="handleLogin(user.email)">
           <img [src]="user.profilePicture" alt="Foto de perfil" />
         </button>

@@ -1,3 +1,5 @@
+import { Role } from './user.interface';
+
 export type Status =
   | 'CANCELADO'
   | 'ACEPTADO'
@@ -13,7 +15,8 @@ export type AppointmentActions =
   | 'VER_REVIEW_PACIENTE'
   | 'VER_MI_COMENTARIO_DIAGNOSTICO'
   | 'VER_CUESTIONARIO'
-  | 'VER_REVIEW_PROFESIONAL_PACIENTE';
+  | 'VER_REVIEW_PROFESIONAL_PACIENTE'
+  | 'VER_MOTIVO_DE_BAJA';
 export interface Appointment {
   id?: string | undefined;
   day: string;
@@ -37,6 +40,7 @@ export interface Appointment_Extra_Info {
   facilitiesAndConditions: number | undefined;
   waitTime: number | undefined;
   securityAndPrivacy: number | undefined;
+  role: Role | undefined;
 }
 export interface PatientHistory {
   id_patient: string;

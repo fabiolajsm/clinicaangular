@@ -42,6 +42,9 @@ export class ActionModalTitlePipe implements PipeTransform {
       case 'VER_REVIEW_PROFESIONAL_PACIENTE':
         modalTitle = 'Calificación que le envié al profesional';
         break;
+      case 'VER_MOTIVO_DE_BAJA':
+        modalTitle = 'Motivo de cancelación del turno';
+        break;
       default:
         modalTitle = '';
         break;

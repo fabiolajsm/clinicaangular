@@ -412,6 +412,17 @@
       Finalizar turno
     </button>
 
+    <button
+      *ngIf="hasToShowCancelOrDeclineReason"
+      type="button"
+      class="btn btn-outline-secondary"
+      data-bs-toggle="modal"
+      data-bs-target="#staticBackdrop"
+      (click)="handleClickAction('VER_MOTIVO_DE_BAJA')"
+    >
+      Ver motivo de cancelación del turno
+    </button>
+
     <!-- Buttons for patient actions -->
     <button
       *ngIf="hasToShowProfessionalReview"

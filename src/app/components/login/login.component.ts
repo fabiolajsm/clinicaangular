@@ -20,6 +20,7 @@ import { FirebaseError } from 'firebase/app';
 import { authErrors } from '../../services/auth.errors';
 import { getAuth } from '@angular/fire/auth';
 import { SectionTitleDirective } from '../../directives/section-title.directive';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
@@ -30,7 +31,7 @@ import { SectionTitleDirective } from '../../directives/section-title.directive'
     RouterModule,
     SweetAlert2Module,
     NgxSpinnerModule,
-    SectionTitleDirective
+    SectionTitleDirective,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
@@ -41,27 +42,33 @@ export class LoginComponent {
   email: string = '';
   password: string = '';
   users: UserInterface[] = [];
+  usersQA: UserInterface[] = [];
   usersQuickAccess = [
     'suarezfabiola17@gmail.com',
     'brallaucraunoite-6064@yopmail.com',
     'especialista2@gmail.com',
     'wesaf63292@lisoren.com',
     'paciente2NoVerificoEmail@gmail.com',
-    'paciente3@noverifico.com',
+    'keubrauwuduloi-5342@yopmail.com',
   ];
+  subsAuth!: Subscription;
 
   constructor(
     private router: Router,
     private authService: AuthService,
     private spinner: NgxSpinnerService
   ) {
-    this.form = this.createForm();
+    this.form = new FormGroup({
+      email: new FormControl('', [Validators.required, Validators.email]),
+      password: new FormControl('', [Validators.required]),
+    });
   }
 
   ngOnInit(): void {
     this.spinner.show();
-    this.authService.getUsers().subscribe((response) => {
-      this.users = response
+    this.subsAuth = this.authService.getUsers().subscribe((response) => {
+      this.users = response;
+      this.usersQA = response
         .filter((user) =>
           this.usersQuickAccess.includes((user as UserInterface).email)
         )
@@ -78,11 +85,8 @@ export class LoginComponent {
     });
   }
 
-  private createForm(): FormGroup {
-    return new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required]),
-    });
+  ngOnDestroy(): void {
+    this.subsAuth.unsubscribe();
   }
 
   handleSubmit() {
@@ -90,6 +94,17 @@ export class LoginComponent {
     const email = this.form.get('email')?.value;
     const password = this.form.get('password')?.value;
 
+    // Check if email exists in the list of users
+    const userWithEmail = this.users.find(
+      (user) => user.email.trim() === email.trim()
+    );
+    if (!userWithEmail) {
+      this.showAlert('Usuario no encontrado');
+      this.spinner.hide();
+      return;
+    }
+
+    // If email is found in users, proceed to get user data
     this.authService.getUserByEmail(email).subscribe(
       (currentUserData) => {
         if (!currentUserData) {
@@ -97,15 +112,19 @@ export class LoginComponent {
           this.spinner.hide();
           return;
         }
-        if (currentUserData && currentUserData.role === 'ESPECIALISTA') {
-          if (!(currentUserData as Specialists).profileEnabled) {
-            this.showAlert(
-              'No puedes ingresar, un administrador debe aprobar tu perfil.'
-            );
-            this.spinner.hide();
-            return;
-          }
+
+        if (
+          currentUserData.role === 'ESPECIALISTA' &&
+          !(currentUserData as Specialists).profileEnabled
+        ) {
+          this.showAlert(
+            'No puedes ingresar, un administrador debe aprobar tu perfil.'
+          );
+          this.spinner.hide();
+          return;
         }
+
+        // Perform login if all conditions are met
         this.authService
           .login(email, password, currentUserData.role as Role)
           .subscribe({
@@ -115,13 +134,11 @@ export class LoginComponent {
                 this.showAlert(
                   'Por favor verifica tu dirección de correo electrónico.'
                 );
-                this.spinner.hide();
-                return;
               } else {
                 this.authService.addToLoginHistory(email);
                 this.router.navigateByUrl('');
-                this.spinner.hide();
               }
+              this.spinner.hide();
             },
             error: (err: FirebaseError) => {
               let errorMessage = 'Se produjo un error desconocido.';
@@ -157,7 +174,7 @@ export class LoginComponent {
 
   handleLogin(email: string) {
     this.spinner.show();
-    const userSelected: UserInterface = this.users.filter(
+    const userSelected: UserInterface = this.usersQA.filter(
       (item) => item.email === email
     )[0];
     this.form.controls['email'].setValue(userSelected.email);

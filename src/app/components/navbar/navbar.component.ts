@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -14,25 +15,25 @@ export class NavbarComponent {
   isLogged: boolean = false;
   isAdmin: boolean = false;
   isPatient: boolean = false;
+  sub!: Subscription;
 
-  constructor(private router: Router, private authService: AuthService) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.authService.isAuthenticated().subscribe((isAuthenticated) => {
-      this.isLogged = isAuthenticated;
-    });
-    this.isAdmin = this.authService.getIsRole('ADMIN');
-    this.isPatient = this.authService.getIsRole('PACIENTE');
+    this.sub = this.authService
+      .isAuthenticated()
+      .subscribe((isAuthenticated) => {
+        this.isLogged = isAuthenticated;
+        const role = this.authService.getRole();
+        this.isAdmin = role === 'ADMIN';
+        this.isPatient = role === 'PACIENTE';
+      });
+  }
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 
   handleLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigateByUrl('');
-      },
-      error: () => {
-        console.log('error en logout');
-      },
-    });
+    this.authService.logout();
   }
 }

@@ -38,7 +38,7 @@ import { SectionTitleDirective } from '../../directives/section-title.directive'
     SweetAlert2Module,
     NgxSpinnerModule,
     RecaptchaModule,
-    SectionTitleDirective
+    SectionTitleDirective,
   ],
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss',
@@ -244,6 +244,8 @@ export class RegisterComponent {
     this.spinner.show();
     if (!this.captcha) {
       this.showCaptchaError = true;
+      this.spinner.hide();
+      return;
     }
     Object.values(this.form.controls).forEach((control) => {
       control.markAsTouched();
@@ -270,50 +272,60 @@ export class RegisterComponent {
             .register(userData.email, userData.password || '')
             .subscribe({
               next: () => {
+                let createUserPromise: Promise<boolean>;
                 if (userData.role === 'PACIENTE') {
-                  this.authService.updatePatient({
+                  createUserPromise = this.authService.createUser({
                     ...userData,
                     healthInsurance: this.form.get('healthInsurance')?.value,
                     secondProfilePicture: imageUrls[1],
                   });
                 } else if (userData.role === 'ESPECIALISTA') {
                   this.addSelectedSpecialties();
-                  this.authService.updateSpecialist({
+                  createUserPromise = this.authService.createUser({
                     ...userData,
                     specialties: this.form.get('specialties')?.value,
                     profileEnabled: false,
                   });
                 } else {
-                  this.authService.updateAdmin(userData);
+                  createUserPromise = this.authService.createUser(userData);
                 }
 
-                // show success message
-                this.form.reset();
-                this.spinner.hide();
-                sendEmailVerification(getAuth().currentUser!)
-                  .then(() => {
-                    this.authService.logout();
-                    Swal.fire({
-                      icon: 'success',
-                      title: 'Registro exitoso!',
-                      text: 'Para iniciar sesión tienes que verificar la cuenta en tu casilla de email.',
-                      showConfirmButton: false,
-                      timer: 8000,
-                    });
-                  })
-                  .catch(() => {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Oops! Esto podría tardar unos minutos más...',
-                      text: 'Lo sentimos, su registro fue exitoso pero hubo un error al enviar el email para verificar su cuenta.',
-                      showConfirmButton: false,
-                      timer: 8000,
-                    });
-                  });
+                // Check createUserPromise after it resolves
+                createUserPromise.then((createdSuccessfully) => {
+                  if (createdSuccessfully) {
+                    this.form.reset();
+                    this.spinner.hide();
+                    sendEmailVerification(getAuth().currentUser!)
+                      .then(() => {
+                        this.authService.logout();
+                        Swal.fire({
+                          icon: 'success',
+                          title: 'Registro exitoso!',
+                          text: 'Para iniciar sesión tienes que verificar la cuenta en tu casilla de email.',
+                          showConfirmButton: false,
+                          timer: 8000,
+                        });
+                      })
+                      .catch(() => {
+                        Swal.fire({
+                          icon: 'error',
+                          title: 'Oops! Esto podría tardar unos minutos más...',
+                          text: 'Lo sentimos, su registro fue exitoso pero hubo un error al enviar el email para verificar su cuenta.',
+                          showConfirmButton: false,
+                          timer: 8000,
+                        });
+                      });
 
-                this.router.navigateByUrl('login');
+                    this.router.navigateByUrl('login');
+                  } else {
+                    // Error occurred during user creation
+                    console.error('Error al crear usuario.');
+                    this.spinner.hide();
+                  }
+                });
               },
               error: (err: FirebaseError) => {
+                console.error('Error al registrar usuario:', err);
                 this.spinner.hide();
                 let errorMessage = 'Se produjo un error desconocido.';
                 for (const error of authErrors) {
@@ -328,6 +340,7 @@ export class RegisterComponent {
         })
         .catch((error) => {
           console.error('Error al subir imágenes:', error);
+          this.spinner.hide();
         });
     } else {
       this.spinner.hide();

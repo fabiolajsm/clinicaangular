@@ -25,12 +25,18 @@ export class AppointmentService {
   firestore = inject(Firestore);
   collectionName = 'appointments';
 
-  createAppointment(newApp: Appointment) {
+  async createAppointment(newApp: Appointment) {
     const appRef: CollectionReference = collection(
       this.firestore,
       this.collectionName
     );
-    addDoc(appRef, newApp);
+    try {
+      await addDoc(appRef, newApp);
+      return true;
+    } catch (error) {
+      console.error('Error al crear usuario:', error);
+      return false;
+    }
   }
 
   getAppointments(): Observable<Appointment[]> {

@@ -23,6 +23,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { StringToDatePipe } from '../../../pipes/string-to-date.pipe';
 import { FormatDatePipe } from '../../../pipes/format-date.pipe';
 import { NotFoundImageDirective } from '../../../directives/not-found-image.directive';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-create-appointments',
@@ -34,7 +35,7 @@ import { NotFoundImageDirective } from '../../../directives/not-found-image.dire
     NgxSpinnerModule,
     MatButtonModule,
     MatStepperModule,
-    NotFoundImageDirective
+    NotFoundImageDirective,
   ],
   templateUrl: './create-appointments.component.html',
   styleUrl: './create-appointments.component.scss',
@@ -80,6 +81,7 @@ export class CreateAppointmentsComponent {
 
   role: Role | undefined = undefined;
   patients: Patients[] | undefined = undefined;
+  private subscriptions: Subscription[] = [];
 
   constructor(
     private _formBuilder: FormBuilder,
@@ -97,50 +99,65 @@ export class CreateAppointmentsComponent {
     this.role = this.authService.getRole() as Role;
     if (this.role === 'ADMIN') {
       // get patients
-      this.authService.getUsers().subscribe((response: UserInterface[]) => {
-        this.patients = response.filter(
-          (item) => item.role === 'PACIENTE'
-        ) as Patients[];
-      });
+      const usersSubscription = this.authService
+        .getUsers()
+        .subscribe((response: UserInterface[]) => {
+          this.patients = response.filter(
+            (item) => item.role === 'PACIENTE'
+          ) as Patients[];
+        });
+      this.subscriptions.push(usersSubscription);
     } else {
       const email = this.authService.getCurrentUserEmail();
       // get patient
       if (email) {
-        this.authService.getUserByEmail(email).subscribe((response) => {
-          if (response?.id) {
-            this.form.get('patientId')?.setValue(response?.id);
-          }
-          this.patientName = `${response?.name} ${response?.lastname}`;
-        });
+        const getUserByEmailSubs = this.authService
+          .getUserByEmail(email)
+          .subscribe((response) => {
+            if (response?.id) {
+              this.form.get('patientId')?.setValue(response?.id);
+            }
+            this.patientName = `${response?.name} ${response?.lastname}`;
+          });
+        this.subscriptions.push(getUserByEmailSubs);
       }
     }
     // Get specialties
-    this.specialtiesService
+    const getProfessionalsSubs = this.specialtiesService
       .getSpecialties()
       .subscribe((data: Specialties[]) => {
         this.specialtiesOptions = data;
       });
-    // Get schedules
-    this.specialtiesService.getSchedules().subscribe((data: Schedules[]) => {
-      this.schedules = data;
-      // Filter professionals by loaded schedules
-      this.authService.getUsers().subscribe((response: UserInterface[]) => {
-        this.professionals = response.filter((item) => {
-          if (
-            item.role === 'ESPECIALISTA' &&
-            (item as Specialists).profileEnabled
-          ) {
-            // Check if the user has at least one schedule loaded
-            return this.schedules?.some(
-              (schedule) => schedule.user_id === item.id
-            );
-          }
-          return false;
-        }) as Specialists[];
 
-        this.spinner.hide();
+    this.subscriptions.push(getProfessionalsSubs);
+    // Get schedules
+    const schedulesSubs = this.specialtiesService
+      .getSchedules()
+      .subscribe((data: Schedules[]) => {
+        this.schedules = data;
+        // Filter professionals by loaded schedules
+        this.authService.getUsers().subscribe((response: UserInterface[]) => {
+          this.professionals = response.filter((item) => {
+            if (
+              item.role === 'ESPECIALISTA' &&
+              (item as Specialists).profileEnabled
+            ) {
+              // Check if the user has at least one schedule loaded
+              return this.schedules?.some(
+                (schedule) => schedule.user_id === item.id
+              );
+            }
+            return false;
+          }) as Specialists[];
+
+          this.spinner.hide();
+        });
+        this.subscriptions.push(schedulesSubs);
       });
-    });
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
   handleSelectProfessional(email: string) {
@@ -311,15 +328,26 @@ export class CreateAppointmentsComponent {
   }
 
   handleCreateRequestAppointment() {
-    this.hasCreatedAppointment = true;
-    this.hasConfirm = true;
     if (!this.appointmentRequested) return;
-    this.appointmentService.createAppointment(this.appointmentRequested);
+    const createAppPromise: Promise<boolean> =
+      this.appointmentService.createAppointment(this.appointmentRequested);
+    createAppPromise.then((res) => {
+      this.hasCreatedAppointment = res;
+      this.hasConfirm = res;
+    });
   }
 
   handleStepperSelectionChange(event: any) {
     if (event.previouslySelectedIndex === 2 && event.selectedIndex === 0) {
       this.handleReset();
+      // Preserve patientId if the role is PACIENTE
+      if (this.role === 'PACIENTE') {
+        const patientIdValue = this.form.get('patientId')?.value;
+        this.form.reset();
+        this.form.get('patientId')?.setValue(patientIdValue ?? '');
+      } else {
+        this.form.reset();
+      }
     }
   }
 
@@ -336,18 +364,11 @@ export class CreateAppointmentsComponent {
     this.appointmentRequested = undefined;
     this.hasConfirm = false;
     this.hasCreatedAppointment = false;
-    // Preserve patientId if the role is PACIENTE
-    if (this.role === 'PACIENTE') {
-      const patientIdValue = this.form.get('patientId')?.value;
-      this.form.reset();
-      this.form.get('patientId')?.setValue(patientIdValue ?? '');
-    } else {
-      this.form.reset();
-    }
   }
 
   handleBack() {
     this.router.navigate([this.role === 'ADMIN' ? '/appointment' : '/']);
     this.handleReset();
+    this.form.reset();
   }
 }

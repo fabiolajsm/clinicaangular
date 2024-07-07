@@ -49,19 +49,18 @@ export class AuthService {
     return getAuth().currentUser?.email;
   }
 
-  updateAdmin(adminData: UserInterface) {
+  async createUser(
+    newUserData: UserInterface | Patients | Specialists
+  ): Promise<boolean> {
     const usersRef = collection(this.firestore, this.userCollectionName);
-    addDoc(usersRef, adminData);
-  }
 
-  updatePatient(patientData: Patients) {
-    const usersRef = collection(this.firestore, this.userCollectionName);
-    addDoc(usersRef, patientData);
-  }
-
-  updateSpecialist(specialistData: Specialists) {
-    const usersRef = collection(this.firestore, this.userCollectionName);
-    addDoc(usersRef, specialistData);
+    try {
+      await addDoc(usersRef, newUserData);
+      return true;
+    } catch (error) {
+      console.error('Error al crear usuario:', error);
+      return false;
+    }
   }
 
   changeProfileEnable(id: string, status: boolean) {

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Appointment } from '../../interfaces/appointment.interface';
 import { AppointmentService } from '../../services/appointment.service';
-import { Subject, Subscription, takeUntil } from 'rxjs';
+import { Subject, switchMap, takeUntil } from 'rxjs';
 import { PatientHistoryComponent } from '../patient-history/patient-history.component';
 import { PatientHistoryService } from '../../services/patient-history.service';
 import { SectionTitleDirective } from '../../directives/section-title.directive';
@@ -30,8 +30,7 @@ export class MyPatientsComponent {
   patientIdSelected: string = '';
 
   specialistId: string | undefined;
-  private unsubscribe$: Subject<void> = new Subject<void>();
-  private authSubscription: Subscription | undefined;
+  private unsubscribe$ = new Subject<void>();
 
   constructor(
     private router: Router,
@@ -42,18 +41,35 @@ export class MyPatientsComponent {
   ) {}
 
   ngOnInit(): void {
-    this.spinner.show();
     const currentUserEmail = this.authService.getCurrentUserEmail();
     if (currentUserEmail) {
-      this.authSubscription = this.authService
+      this.spinner.show();
+      this.authService
         .getUserByEmail(currentUserEmail)
-        .pipe(takeUntil(this.unsubscribe$))
-        .subscribe((response) => {
-          if (response?.id) {
-            this.specialistId = response.id;
-            if (!this.specialistId) return;
-            this.getPatients(); // get patients by professional
+        .pipe(
+          takeUntil(this.unsubscribe$),
+          switchMap((response) => {
+            if (response?.id) {
+              this.specialistId = response.id;
+              return this.authService.getUsers();
+            } else {
+              throw new Error('Specialist ID not found');
+            }
+          }),
+          takeUntil(this.unsubscribe$)
+        )
+        .subscribe((users: UserInterface[]) => {
+          this.patients = users.filter(
+            (user) => user.role === 'PACIENTE'
+          ) as Patients[];
+
+          if (!this.patients || !this.specialistId) {
+            this.spinner.hide();
+            return;
           }
+
+          this.processPatients();
+          this.spinner.hide();
         });
     }
   }
@@ -61,59 +77,64 @@ export class MyPatientsComponent {
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
-    }
   }
 
-  private getPatients(): void {
-    this.authService
-      .getUsers()
-      .pipe(takeUntil(this.unsubscribe$))
-      .subscribe((response: UserInterface[]) => {
-        this.patients = response.filter(
-          (item) => item.role === 'PACIENTE'
-        ) as Patients[];
-        this.patients.forEach((patient) => {
-          this.appointmentService
-            .getAppointmentsBySpecialistAndPatient(
-              this.specialistId as string,
-              patient.id as string
-            )
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe((appointments: Appointment[]) => {
-              if (!appointments.length) return;
-              if (!this.patientsWithAppointments.includes(patient)) {
+  private processPatients(): void {
+    this.patients.forEach((patient) => {
+      this.appointmentService
+        .getAppointmentsBySpecialistAndPatient(
+          this.specialistId as string,
+          patient.id as string
+        )
+        .pipe(takeUntil(this.unsubscribe$))
+        .subscribe((res: Appointment[]) => {
+          this.appointments = res;
+          if (this.appointments.length) {
+            this.appointments.forEach((item) => {
+              if (
+                patient.id === item.patient_id &&
+                !this.patientsWithAppointments.includes(patient)
+              ) {
                 this.patientsWithAppointments.push(patient);
-                this.appointments = appointments;
               }
             });
+          }
         });
-        this.spinner.hide();
-      });
+    });
   }
 
   private assignPatientHistoryToAppointments(
     appointmentToUpdate: Appointment
   ): void {
-    if (!this.patientIdSelected.length || !appointmentToUpdate.id) return;
+    if (!this.patientIdSelected || !appointmentToUpdate.id) return;
+
+    this.spinner.show();
     this.patientHistoryService
       .getPatientHistoryByAppointment(
         this.patientIdSelected,
         appointmentToUpdate.id
       )
-      .subscribe((history) => {
-        appointmentToUpdate.patientHistory = history;
-      });
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        (history) => {
+          appointmentToUpdate.patientHistory = history;
+          this.spinner.hide();
+        },
+        (error) => {
+          console.error('Error fetching patient history', error);
+          this.spinner.hide();
+        }
+      );
   }
 
-  togglePatientSelection(id: string | undefined) {
+  togglePatientSelection(id: string | undefined): void {
     if (!id) return;
     this.patientIdSelected = id;
-    this.appointments.forEach((item) =>
-      this.assignPatientHistoryToAppointments(item)
-    );
+    this.appointments.forEach((item) => {
+      this.assignPatientHistoryToAppointments(item);
+    });
   }
+
   handleBack(): void {
     this.router.navigate(['/']);
   }

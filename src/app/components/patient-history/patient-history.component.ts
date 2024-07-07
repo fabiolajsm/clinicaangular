@@ -23,6 +23,17 @@ export class PatientHistoryComponent {
 
   ngOnInit() {
     this.role = this.authService.getRole() as Role;
+
+    // Order by date
+    if (this.appointments) {
+      this.appointments.sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+
+      if (this.showLastThreeAppointments) {
+        this.appointments = this.appointments.slice(0, 3);
+      }
+    }
   }
 
   getExtraDataKeys(extraData: { [key: string]: string } | undefined): string[] {

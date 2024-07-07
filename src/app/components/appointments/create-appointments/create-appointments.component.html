@@ -80,7 +80,6 @@
               <p class="specialty-name">{{ specialty }}</p>
               <img
                 class="specialty-image"
-                *ngIf="getSpecialtyImg(specialty)"
                 [src]="getSpecialtyImg(specialty)"
                 alt="Especialidad"
                 appNotFoundImage
@@ -152,7 +151,7 @@
     </mat-step>
 
     <!-- Step 2 -->
-    <mat-step [completed]="form.valid" [editable]="false">
+    <mat-step>
       <ng-template matStepLabel>Confirmar</ng-template>
       <div *ngIf="appointmentRequested" class="appointmentRequested">
         <h3>Confirmación del turno</h3>
