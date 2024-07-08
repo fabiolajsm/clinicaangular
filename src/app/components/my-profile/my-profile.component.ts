@@ -210,17 +210,17 @@ export class MyProfileComponent {
   handleDownloadHistory() {
     if (this.formDownloadHistory.valid) {
       const specialty = this.formDownloadHistory.get('specialty')?.value;
-      console.log(specialty, 'especialidad');
+      const appointmentsBySpecialty = this.appointments?.filter(
+        (item) => item.specialty === specialty
+      );
+      if (!this.user?.name || !this.user?.lastname || !appointmentsBySpecialty)
+        return;
+      this.patientHistoryService.downloadPatientHistory(
+        this.user?.name,
+        this.user?.lastname,
+        specialty,
+        appointmentsBySpecialty
+      );
     }
-  }
-
-  downloadPatientHistory() {
-    // TODO: hacer otro tipo de descraga
-    // if (!this.user?.name || !this.user?.lastname || !this.patientData) return;
-    // this.patientHistoryService.downloadPatientHistory(
-    //   this.user?.name,
-    //   this.user?.lastname,
-    //   this.patientData
-    // );
   }
 }

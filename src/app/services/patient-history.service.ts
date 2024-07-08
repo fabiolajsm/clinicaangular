@@ -9,8 +9,11 @@ import {
   where,
 } from '@angular/fire/firestore';
 import { Firestore } from '@angular/fire/firestore';
-import { PatientHistory } from '../interfaces/appointment.interface';
-import jsPDF from 'jspdf';
+import {
+  Appointment,
+  PatientHistory,
+} from '../interfaces/appointment.interface';
+import jsPDF, { TextOptionsLight } from 'jspdf';
 
 @Injectable({
   providedIn: 'root',
@@ -85,7 +88,8 @@ export class PatientHistoryService {
   downloadPatientHistory(
     name: string,
     lastname: string,
-    patientHistory: PatientHistory[]
+    specialty: string,
+    appointmentsPatient: Appointment[]
   ) {
     const document = new jsPDF('portrait', 'px', 'a4');
     const currentDate = new Date();
@@ -96,42 +100,84 @@ export class PatientHistoryService {
       '/' +
       currentDate.getFullYear();
 
-    document.text('Fecha de emisión: ' + formattedDate, 35, 20);
+    const textOptions: TextOptionsLight = {
+      maxWidth: 520,
+      align: 'left',
+      lineHeightFactor: 1.2,
+    };
     const logo = new Image();
     logo.src = '../../assets/favicon.jpg';
-    document.addImage(logo, 'JPG', 120, 40, 40, 40);
-    document.text('Clínica Online', 190, 80);
-    document.text(`Historial clínico de ${name} ${lastname}`, 35, 100);
-    let position = 120;
-    patientHistory.forEach((data) => {
-      document.text('Altura: ' + data.height + ' cm', 35, (position += 15));
-      document.text('Peso: ' + data.weight + ' Kg', 35, (position += 15));
-      document.text(
-        'Temperatura: ' + data.temperature + '°C',
-        35,
-        (position += 15)
-      );
-      document.text('Presión arterial: ' + data.pressure, 35, (position += 15));
 
-      if (data.extraData) {
-        for (const key in data.extraData) {
-          if (data.extraData.hasOwnProperty(key)) {
+    logo.onload = () => {
+      document.addImage(logo, 'JPG', 35, 15, 60, 60);
+      document.setFontSize(18);
+      document.setFont('helvetica', 'bold');
+      document.text(
+        `Historial clínico de ${name} ${lastname}`,
+        110,
+        35,
+        textOptions
+      );
+
+      document.setFontSize(14);
+      document.setFont('helvetica', 'normal');
+      document.text(`Especialidad: ${specialty}`, 110, 55, textOptions);
+
+      document.setFontSize(12);
+      document.text('Fecha de emisión: ' + formattedDate, 110, 75, textOptions);
+
+      let position = 110;
+      if (!appointmentsPatient.length) {
+        document.setFontSize(14);
+        document.text(
+          `No hay historial disponible para la especialidad ${specialty}`,
+          35,
+          position,
+          textOptions
+        );
+      } else {
+        appointmentsPatient.forEach((data) => {
+          position += 20;
+          document.setFontSize(14);
+          document.setFont('helvetica', 'bold');
+          document.text(`Detalle del turno:`, 35, position, textOptions);
+
+          position += 20;
+          document.setFontSize(12);
+          document.setFont('helvetica', 'normal');
+          document.text(
+            `Día: ${data.day}. Horario: ${data.start_time} - ${data.end_time} hs. Fecha: ${data.date}. Especialista: ${data.professional_name}`,
+            35,
+            position,
+            textOptions
+          );
+
+          if (data.patientHistory) {
+            const { height, weight, temperature, pressure, extraData } =
+              data.patientHistory;
+            position += 20;
             document.text(
-              `${key}: ${data.extraData[key]}`,
+              `Altura: ${height} cm. Peso: ${weight} kg. Temperatura: ${temperature} °C. Presión arterial: ${pressure} mmHg`,
               35,
-              (position += 15)
+              position,
+              textOptions
             );
+            if (extraData) {
+              Object.keys(extraData).forEach((key) => {
+                position += 20;
+                document.text(
+                  `${key}: ${extraData[key]}`,
+                  35,
+                  position,
+                  textOptions
+                );
+              });
+            }
           }
-        }
+          position += 20;
+        });
       }
-
-      document.text(
-        '----------------------------------------------------------------',
-        35,
-        (position += 15)
-      );
-    });
-
-    document.save(`${name}-${lastname}-historia-clinica`);
+      document.save(`${name}-${lastname}-historial-clinico-${specialty}`);
+    };
   }
 }
