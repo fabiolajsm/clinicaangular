@@ -42,6 +42,7 @@ export const routes: Routes = [
         (c) => c.MyProfileComponent
       ),
     canMatch: [authGuard],
+    title: 'Mi perfil',
   },
   {
     path: 'appointment',
@@ -58,6 +59,7 @@ export const routes: Routes = [
         './components/appointments/create-appointments/create-appointments.component'
       ).then((c) => c.CreateAppointmentsComponent),
     canMatch: [authGuard],
+    title: 'Solicitar turno',
   },
   {
     path: 'myPatients',
@@ -66,6 +68,16 @@ export const routes: Routes = [
         (c) => c.MyPatientsComponent
       ),
     canMatch: [authGuard],
+    title: 'Mis pacientes',
+  },
+  {
+    path: 'reports',
+    loadComponent: () =>
+      import('./components/reports/all-reports/all-reports.component').then(
+        (c) => c.AllReportsComponent
+      ),
+    title: 'Informes',
+    canMatch: [authGuard, adminGuard],
   },
   {
     path: '**',

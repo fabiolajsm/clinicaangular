@@ -1,0 +1,24 @@
+<div class="infoContainer">
+  <button
+    type="button"
+    class="fa fa-arrow-left icon-button"
+    aria-hidden="true"
+    (click)="handleBack()"
+  ></button>
+  <h1 appSectionTitle>Informes</h1>
+  <mat-tab-group>
+    <mat-tab label="Ingresos al sistema"><app-login /></mat-tab>
+    <mat-tab label="Turnos por especialidad">
+      <app-appointments-by-specialty />
+    </mat-tab>
+    <mat-tab label="Turnos por día">
+      <app-appointments-by-day />
+    </mat-tab>
+    <mat-tab label="Turnos por médico">
+      <app-appointments-by-professional />
+    </mat-tab>
+    <mat-tab label="Turnos finalizados">
+      <app-appointments-completed />
+    </mat-tab>
+  </mat-tab-group>
+</div>

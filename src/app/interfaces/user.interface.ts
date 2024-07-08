@@ -20,3 +20,8 @@ export interface Specialists extends UserInterface {
   specialties: string[];
   profileEnabled: boolean;
 }
+
+export type LoginHistory = {
+  email: string;
+  date: Date;
+};

@@ -8,10 +8,20 @@
     </li>
   </ul>
   <ul>
-    <li class="listOption" *ngIf="isLogged && isAdmin" routerLink="/manageUsers">
+    <li
+      class="listOption"
+      *ngIf="isLogged && isAdmin"
+      routerLink="/manageUsers"
+    >
       <a>
         <i class="fa fa-users" aria-hidden="true"></i>
         <p>Usuarios</p>
+      </a>
+    </li>
+    <li class="listOption" *ngIf="isLogged && isAdmin" routerLink="/reports">
+      <a>
+        <i class="fa fa-signal" aria-hidden="true"></i>
+        <p>Informes</p>
       </a>
     </li>
     <li

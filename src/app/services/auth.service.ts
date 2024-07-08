@@ -127,4 +127,18 @@ export class AuthService {
   getIsRole(role: Role): boolean {
     return role === localStorage.getItem('role');
   }
+
+  getLoginHistory(): Observable<[]> {
+    const loginHistory = collection(this.firestore, this.historyCollectionName);
+    return collectionData(loginHistory, { idField: 'id' }) as Observable<[]>;
+  }
+
+  getDoctors(): Observable<UserInterface[]> {
+    const usersRef = collection(this.firestore, this.userCollectionName);
+    const doctorConstraint = where('role', '==', 'ESPECIALISTA');
+    const doctorsQuery = query(usersRef, doctorConstraint);
+    return collectionData(doctorsQuery, { idField: 'id' }) as Observable<
+      UserInterface[]
+    >;
+  }
 }

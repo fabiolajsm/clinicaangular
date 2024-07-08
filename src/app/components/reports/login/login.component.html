@@ -1,0 +1,17 @@
+<ngx-spinner
+  bdColor="rgba(0, 0, 0, 0.8)"
+  size="medium"
+  color="#edf2f4"
+  type="ball-scale-multiple"
+  [fullScreen]="true"
+  ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
+</ngx-spinner>
+
+<p>Logs de ingresos al sistema</p>
+
+<ngx-charts-pie-grid
+  [view]="[600, 400]"
+  [scheme]="colorScheme"
+  [results]="data"
+>
+</ngx-charts-pie-grid>

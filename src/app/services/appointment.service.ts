@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
 import {
   Appointment,
   Appointment_Extra_Info,
+  Status,
 } from '../interfaces/appointment.interface';
 
 @Injectable({
@@ -50,17 +51,20 @@ export class AppointmentService {
     }) as Observable<Appointment[]>;
   }
 
-  getAppointmentsBySpecialist(id: string): Observable<Appointment[]> {
+  getAppointmentsBySpecialist(
+    id: string,
+    status?: Status
+  ): Observable<Appointment[]> {
     const appRef: CollectionReference = collection(
       this.firestore,
       this.collectionName
     );
-    const specialtyConstraint: QueryConstraint = where(
-      'professional_id',
-      '==',
-      id
-    );
-    const appQuery = query(appRef, specialtyConstraint);
+    let constraints: QueryConstraint[] = [where('professional_id', '==', id)];
+    if (status) {
+      constraints.push(where('status', '==', status));
+    }
+    const appQuery = query(appRef, ...constraints);
+
     return collectionData(appQuery, { idField: 'id' }) as Observable<
       Appointment[]
     >;
