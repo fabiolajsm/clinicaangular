@@ -12,7 +12,6 @@ import { SpecialtiesService } from '../../../services/specialties.service';
   standalone: true,
   imports: [NgxSpinnerModule, NgxChartsModule],
   templateUrl: './appointments-by-specialty.component.html',
-  styleUrl: './appointments-by-specialty.component.scss',
 })
 export class AppointmentsBySpecialtyComponent {
   showChart: boolean = false;

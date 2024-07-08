@@ -10,7 +10,6 @@ import { Appointment } from '../../../interfaces/appointment.interface';
   standalone: true,
   imports: [NgxSpinnerModule, NgxChartsModule],
   templateUrl: './appointments-by-day.component.html',
-  styleUrl: './appointments-by-day.component.scss',
 })
 export class AppointmentsByDayComponent {
   showChart: boolean = false;

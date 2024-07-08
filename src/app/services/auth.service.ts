@@ -93,7 +93,21 @@ export class AuthService {
 
   addToLoginHistory(email: string) {
     const loginHistory = collection(this.firestore, this.historyCollectionName);
-    addDoc(loginHistory, { email: email, date: new Date() });
+    const formattedDate = this.formatDate(new Date());
+    addDoc(loginHistory, { email: email, date: formattedDate });
+  }
+
+  private formatDate(date: Date): string {
+    const formatted = `${date.getFullYear()}-${this.padNumber(
+      date.getMonth() + 1
+    )}-${this.padNumber(date.getDate())} a las ${this.padNumber(
+      date.getHours()
+    )}:${this.padNumber(date.getMinutes())} hs`;
+    return formatted;
+    return formatted;
+  }
+  private padNumber(num: number): string {
+    return num.toString().padStart(2, '0');
   }
 
   getUserByEmail(email: string): Observable<UserInterface | undefined> {

@@ -11,7 +11,6 @@ import { AuthService } from '../../../services/auth.service';
   standalone: true,
   imports: [NgxSpinnerModule, NgxChartsModule],
   templateUrl: './appointments-by-professional.component.html',
-  styleUrl: './appointments-by-professional.component.scss',
 })
 export class AppointmentsByProfessionalComponent {
   showChart: boolean = false;

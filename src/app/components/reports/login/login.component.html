@@ -7,7 +7,11 @@
   ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
 </ngx-spinner>
 
-<p>Logs de ingresos al sistema</p>
+<ng-container *ngIf="loginDetail.length">
+  <ul *ngFor="let item of loginDetail">
+    <li>Usuario: {{ item.user }}, Último login: {{ item.lastLogin }}</li>
+  </ul>
+</ng-container>
 
 <ngx-charts-pie-grid
   [view]="[600, 400]"
