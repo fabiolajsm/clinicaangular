@@ -7,6 +7,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 
 import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
+import { PatientHistoryService } from '../../../services/patient-history.service';
 
 @Component({
   selector: 'app-manage-users',
@@ -26,17 +27,36 @@ export class ManageUsersComponent {
 
   constructor(
     private spinner: NgxSpinnerService,
-    private appointmentService: AppointmentService
+    private appointmentService: AppointmentService,
+    private patientHistoryService: PatientHistoryService
   ) {}
 
   ngOnInit() {
     this.spinner.show();
     this.appointmentService.getAppointments().subscribe((response) => {
-      this.appointments = response.filter(
-        (item) => item.status === 'REALIZADO'
-      );
+      this.appointments = response;
+      if (this.appointments) {
+        this.appointments.forEach((item) => {
+          this.assignPatientHistoryToAppointments(item);
+        });
+      }
+
+      this.spinner.hide();
     });
-    this.spinner.hide();
+  }
+
+  private assignPatientHistoryToAppointments(
+    appointmentToUpdate: Appointment
+  ): void {
+    if (!appointmentToUpdate.patient_id || !appointmentToUpdate.id) return;
+    this.patientHistoryService
+      .getPatientHistoryByAppointment(
+        appointmentToUpdate.patient_id,
+        appointmentToUpdate.id
+      )
+      .subscribe((history) => {
+        appointmentToUpdate.patientHistory = history;
+      });
   }
 
   handleItemSelected(user: any) {

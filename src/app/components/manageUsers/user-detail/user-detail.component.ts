@@ -11,7 +11,6 @@ import { AuthService } from '../../../services/auth.service';
 import { RouterModule } from '@angular/router';
 import { PatientHistoryComponent } from '../../patient-history/patient-history.component';
 import { Appointment } from '../../../interfaces/appointment.interface';
-import { PatientHistoryService } from '../../../services/patient-history.service';
 
 @Component({
   selector: 'app-user-detail',
@@ -32,7 +31,6 @@ export class UserDetailComponent {
 
   constructor(
     private authService: AuthService,
-    private patientHistoryService: PatientHistoryService,
     private spinner: NgxSpinnerService
   ) {}
 
@@ -62,28 +60,11 @@ export class UserDetailComponent {
       this.appointments
     ) {
       this.patientAppointments = this.appointments.filter(
-        (item) => item.patient_id === this.userSelected?.id
+        (item) =>
+          item.patient_id === this.userSelected?.id &&
+          item.status === 'REALIZADO'
       );
-      if (this.patientAppointments) {
-        this.patientAppointments.forEach((appointment) => {
-          this.assignPatientHistoryToAppointments(appointment);
-        });
-      }
     }
-  }
-
-  private assignPatientHistoryToAppointments(
-    appointmentToUpdate: Appointment
-  ): void {
-    if (!appointmentToUpdate.patient_id || !appointmentToUpdate.id) return;
-    this.patientHistoryService
-      .getPatientHistoryByAppointment(
-        appointmentToUpdate.patient_id,
-        appointmentToUpdate.id
-      )
-      .subscribe((history) => {
-        appointmentToUpdate.patientHistory = history;
-      });
   }
 
   getData(role: Role): string {
