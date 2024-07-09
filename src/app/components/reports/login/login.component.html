@@ -8,13 +8,13 @@
 </ngx-spinner>
 
 <ng-container *ngIf="showChart && loginDetail.length">
-  <div id="userLog">
-    <ul *ngFor="let item of loginDetail">
+  <div id="userLog" #userLog>
+    <p id="titlelog" class="tabTitle">Logs de ingresos al sistema</p>
+
+    <ul id="ulLog" *ngFor="let item of loginDetail">
       <li>Usuario: {{ item.user }}. Último login: {{ item.lastLogin }}</li>
     </ul>
-
     <ngx-charts-pie-grid
-      id="loginChart"
       [view]="[600, 400]"
       [scheme]="colorScheme"
       [results]="data"

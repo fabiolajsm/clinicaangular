@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
 import { Subscription } from 'rxjs';
@@ -6,6 +6,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { AuthService } from '../../../services/auth.service';
+import { GeneratePdfService } from '../../../services/generate-pdf.service';
 
 @Component({
   selector: 'app-appointments-by-professional',
@@ -26,11 +27,13 @@ export class AppointmentsByProfessionalComponent {
   data: { name: string; value: number }[] = [];
 
   private specialistsLoadedCount: number = 0;
+  @ViewChild('appByProf') idElement!: ElementRef;
 
   constructor(
     private spinner: NgxSpinnerService,
     private authService: AuthService,
-    private appService: AppointmentService
+    private appService: AppointmentService,
+    private pdfService: GeneratePdfService
   ) {}
 
   ngOnInit(): void {
@@ -101,9 +104,8 @@ export class AppointmentsByProfessionalComponent {
   }
 
   downloadPDF() {
-    this.appService.downloadPDF(
-      'appByProf',
-      'Cantidad de turnos solicitados a un médico este mes',
+    this.pdfService.createPDF(
+      this.idElement.nativeElement,
       'Cantidad-Turnos-Solicitados-A-Medicos'
     );
   }

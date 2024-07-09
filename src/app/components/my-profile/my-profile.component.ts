@@ -23,6 +23,7 @@ import { Appointment } from '../../interfaces/appointment.interface';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { AppointmentService } from '../../services/appointment.service';
 import { Subscription } from 'rxjs';
+import { GeneratePdfService } from '../../services/generate-pdf.service';
 
 @Component({
   selector: 'app-my-profile',
@@ -60,6 +61,7 @@ export class MyProfileComponent {
     private specialtiesService: SpecialtiesService,
     private spinner: NgxSpinnerService,
     private patientHistoryService: PatientHistoryService,
+    private pdfService: GeneratePdfService,
     private appointmentService: AppointmentService
   ) {
     this.form = new FormGroup({
@@ -212,7 +214,7 @@ export class MyProfileComponent {
       );
       if (!this.user?.name || !this.user?.lastname || !appointmentsBySpecialty)
         return;
-      this.patientHistoryService.downloadPatientHistory(
+      this.pdfService.downloadPatientHistory(
         this.user?.name,
         this.user?.lastname,
         specialty,

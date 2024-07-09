@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import {
   LoginHistory,
   UserInterface,
@@ -8,6 +8,7 @@ import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Subscription } from 'rxjs';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
 import { AppointmentService } from '../../../services/appointment.service';
+import { GeneratePdfService } from '../../../services/generate-pdf.service';
 
 @Component({
   selector: 'app-login',
@@ -28,11 +29,12 @@ export class LoginComponent {
     domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5'],
   };
   showChart: boolean = false;
+  @ViewChild('userLog') idElement!: ElementRef;
 
   constructor(
     private spinner: NgxSpinnerService,
     private authService: AuthService,
-    private appService: AppointmentService
+    private pdfService: GeneratePdfService
   ) {}
 
   ngOnInit(): void {
@@ -109,10 +111,9 @@ export class LoginComponent {
   }
 
   downloadPDF() {
-    this.appService.downloadPDF(
-      'userLog',
-      'Ingresos al sistema',
-      'Ingresos-Al-Sistema'
+    this.pdfService.createPDF(
+      this.idElement.nativeElement,
+      'Ingresos al sistema'
     );
   }
 }

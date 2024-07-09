@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
 import { Subscription } from 'rxjs';
 import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
+import { GeneratePdfService } from '../../../services/generate-pdf.service';
 
 @Component({
   selector: 'app-appointments-by-day',
@@ -29,10 +30,12 @@ export class AppointmentsByDayComponent {
     { name: 'Jueves', value: 0 },
     { name: 'Viernes', value: 0 },
   ];
+  @ViewChild('appByDay') idElement!: ElementRef;
 
   constructor(
     private spinner: NgxSpinnerService,
-    private appService: AppointmentService
+    private appService: AppointmentService,
+    private pdfService: GeneratePdfService
   ) {}
 
   ngOnInit() {
@@ -65,9 +68,8 @@ export class AppointmentsByDayComponent {
   }
 
   downloadPDF() {
-    this.appService.downloadPDF(
-      'appByDay',
-      'Cantidad de turnos por día',
+    this.pdfService.createPDF(
+      this.idElement.nativeElement,
       'Cantidad-Turnos-Por-Dia'
     );
   }

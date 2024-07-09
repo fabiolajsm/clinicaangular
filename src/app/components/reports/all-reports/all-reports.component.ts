@@ -22,7 +22,6 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatTabsModule,
   ],
   templateUrl: './all-reports.component.html',
-  styleUrl: './all-reports.component.scss',
 })
 export class AllReportsComponent {
   constructor(private router: Router) {}

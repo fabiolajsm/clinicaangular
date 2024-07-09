@@ -8,7 +8,9 @@
 </ngx-spinner>
 
 <ng-container *ngIf="showChart">
-  <div id="appBySpe">
+  <div id="appBySpe" #appBySpe>
+    <p title="speTitle" class="tabTitle">Cantidad de turnos por especialidad</p>
+
     <ngx-charts-pie-grid
       [view]="[600, 400]"
       [scheme]="colorScheme"
@@ -17,6 +19,7 @@
     </ngx-charts-pie-grid>
   </div>
   <button
+    id="bySpe"
     type="button"
     class="btn btn-outline-secondary mb-3 mt-3"
     (click)="downloadPDF()"

@@ -8,27 +8,18 @@
   <h1 appSectionTitle>Informes</h1>
   <mat-tab-group>
     <mat-tab label="Ingresos al sistema">
-      <p class="tabTitle">Logs de ingresos al sistema</p>
       <app-login />
     </mat-tab>
     <mat-tab label="Turnos por especialidad">
-      <p class="tabTitle">Cantidad de turnos por especialidad</p>
       <app-appointments-by-specialty />
     </mat-tab>
     <mat-tab label="Turnos por día">
-      <p class="tabTitle">Cantidad de turnos por día</p>
       <app-appointments-by-day />
     </mat-tab>
     <mat-tab label="Turnos por médico">
-      <p class="tabTitle">
-        Cantidad de turnos solicitados a un médico este mes
-      </p>
       <app-appointments-by-professional />
     </mat-tab>
     <mat-tab label="Turnos finalizados">
-      <p class="tabTitle">
-        Cantidad de turnos finalizados por médico en este mes
-      </p>
       <app-appointments-completed />
     </mat-tab>
   </mat-tab-group>

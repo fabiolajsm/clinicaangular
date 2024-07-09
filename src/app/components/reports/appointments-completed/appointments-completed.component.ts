@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
 import { Subscription } from 'rxjs';
@@ -6,8 +6,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { AuthService } from '../../../services/auth.service';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { GeneratePdfService } from '../../../services/generate-pdf.service';
 
 @Component({
   selector: 'app-appointments-completed',
@@ -28,11 +27,13 @@ export class AppointmentsCompletedComponent {
   data: { name: string; value: number }[] = [];
 
   private specialistsLoadedCount: number = 0;
+  @ViewChild('appCompleted') idElement!: ElementRef;
 
   constructor(
     private spinner: NgxSpinnerService,
     private authService: AuthService,
-    private appService: AppointmentService
+    private appService: AppointmentService,
+    private pdfService: GeneratePdfService
   ) {}
 
   ngOnInit(): void {
@@ -102,9 +103,8 @@ export class AppointmentsCompletedComponent {
   }
 
   downloadPDF() {
-    this.appService.downloadPDF(
-      'appCompleted',
-      'Cantidad de turnos finalizados por médico en este mes',
+    this.pdfService.createPDF(
+      this.idElement.nativeElement,
       'Cantidad-Turnos-Completos'
     );
   }

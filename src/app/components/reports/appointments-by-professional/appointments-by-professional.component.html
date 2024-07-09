@@ -8,7 +8,10 @@
 </ngx-spinner>
 
 <ng-container *ngIf="showChart">
-  <div id="appByProf">
+  <div id="appByProf" #appByProf>
+    <p id="profTitle" class="tabTitle">
+      Cantidad de turnos solicitados a un médico este mes
+    </p>
     <ngx-charts-pie-grid
       [view]="[600, 400]"
       [scheme]="colorScheme"
@@ -17,6 +20,7 @@
     </ngx-charts-pie-grid>
   </div>
   <button
+    id="ByPro"
     type="button"
     class="btn btn-outline-secondary mb-3 mt-3"
     (click)="downloadPDF()"

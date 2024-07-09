@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
 import { Subscription } from 'rxjs';
@@ -6,6 +6,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
 import { Specialties } from '../../../interfaces/specialties.interface';
 import { SpecialtiesService } from '../../../services/specialties.service';
+import { GeneratePdfService } from '../../../services/generate-pdf.service';
 
 @Component({
   selector: 'app-appointments-by-specialty',
@@ -26,11 +27,13 @@ export class AppointmentsBySpecialtyComponent {
   };
 
   data: { name: string; value: number }[] = [];
+  @ViewChild('appBySpe') idElement!: ElementRef;
 
   constructor(
     private spinner: NgxSpinnerService,
     private appService: AppointmentService,
-    private specialtyService: SpecialtiesService
+    private specialtyService: SpecialtiesService,
+    private pdfService: GeneratePdfService
   ) {}
 
   ngOnInit() {
@@ -77,9 +80,8 @@ export class AppointmentsBySpecialtyComponent {
   }
 
   downloadPDF() {
-    this.appService.downloadPDF(
-      'appBySpe',
-      'Cantidad de turnos por especialidad',
+    this.pdfService.createPDF(
+      this.idElement.nativeElement,
       'Cantidad-Turnos-Por-Especialidad'
     );
   }
