@@ -15,31 +15,22 @@
 ></button>
 
 <h1 appSectionTitle>Usuarios</h1>
-<table class="table table-bordered" *ngIf="users && users.length > 0">
-  <thead>
-    <tr>
-      <th scope="col"></th>
-      <th scope="col">Role</th>
-      <th scope="col">Nombre</th>
-      <th scope="col">Apellido</th>
-      <th scope="col">Email</th>
-    </tr>
-  </thead>
-  <tbody *ngFor="let user of users">
-    <tr>
-      <th scope="row">
-        <input
-          class="form-check-input"
-          type="radio"
-          name="flexRadioDefault"
-          id="flexRadioDefault1"
+
+<ng-container *ngIf="users && users.length > 0">
+  <div class="cards-in-row">
+    <div class="card" style="width: 18rem" *ngFor="let user of users">
+      <div class="card-body">
+        <h5 class="card-title">{{ user.name }} {{ user.lastname }}</h5>
+        <h6 class="card-subtitle mb-2 text-body-secondary">{{ user.role }}</h6>
+        <p class="card-text">Email: {{ user.email }}. Edad: {{ user.age }}</p>
+        <button
+          type="button"
+          class="btn btn-outline-info"
           (click)="handleClick(user.email)"
-        />
-      </th>
-      <td>{{ user.role }}</td>
-      <td>{{ user.name }}</td>
-      <td>{{ user.lastname }}</td>
-      <td>{{ user.email }}</td>
-    </tr>
-  </tbody>
-</table>
+        >
+          Ver info / Descargar datos
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-container>

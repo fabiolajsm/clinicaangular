@@ -9,7 +9,7 @@
 
 <ng-container *ngIf="userSelected; else emptyDetail">
   <!-- Card Start -->
-  <div class="card">
+  <div class="card detail">
     <h5 class="card-header">{{ userSelected.role }}</h5>
     <div class="card-body">
       <h5 class="card-title">
@@ -49,5 +49,5 @@
 </ng-container>
 
 <ng-template #emptyDetail>
-  <p>No ha seleccionado un usuario</p>
+  <p class="detail">No ha seleccionado un usuario</p>
 </ng-template>
