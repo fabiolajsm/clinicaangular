@@ -56,9 +56,8 @@ export class MyPatientsComponent {
           (item: UserInterface) => item.role === 'PACIENTE'
         );
         this.processPatients();
-        this.spinner.hide();
       });
-
+      this.spinner.hide();
       this.subscriptions.push(userByEmailSub, usersSub);
     }
   }
