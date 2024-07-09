@@ -106,7 +106,7 @@ export class PatientHistoryService {
       lineHeightFactor: 1.2,
     };
     const logo = new Image();
-    logo.src = '../../assets/favicon.jpg';
+    logo.src = '../../assets/favicon.png';
 
     logo.onload = () => {
       document.addImage(logo, 'JPG', 35, 15, 60, 60);
