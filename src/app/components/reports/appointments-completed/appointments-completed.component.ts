@@ -6,6 +6,8 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { AuthService } from '../../../services/auth.service';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Component({
   selector: 'app-appointments-completed',
@@ -97,5 +99,13 @@ export class AppointmentsCompletedComponent {
     if (allLoaded) {
       this.showChart = true;
     }
+  }
+
+  downloadPDF() {
+    this.appService.downloadPDF(
+      'appCompleted',
+      'Cantidad de turnos finalizados por médico en este mes',
+      'Cantidad-Turnos-Completos'
+    );
   }
 }

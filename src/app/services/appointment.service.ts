@@ -18,6 +18,8 @@ import {
   Appointment_Extra_Info,
   Status,
 } from '../interfaces/appointment.interface';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 @Injectable({
   providedIn: 'root',
@@ -126,5 +128,20 @@ export class AppointmentService {
       'appointments_extra_info'
     );
     addDoc(appRef, data);
+  }
+  downloadPDF(id: string, title: string, namePdf: string) {
+    const element = document.getElementById(id) as HTMLElement;
+    html2canvas(element).then((canvas: any) => {
+      const pdfFile = new jsPDF('l', 'px', 'a4');
+      pdfFile.text(`Fecha emisión: ${new Date().toLocaleString()}`, 240, 20);
+      const imagen = new Image();
+      imagen.src = '../../../assets/favicon.jpg';
+      pdfFile.addImage(imagen, 'JPG', 120, 40, 60, 60);
+      pdfFile.text('Clínica Online', 190, 80);
+      pdfFile.text(title, 120, 130);
+      const imgData = canvas.toDataURL('image/jpg', 2.5);
+      pdfFile.addImage(imgData, 10, 150, 700, 300);
+      pdfFile.save(`${namePdf}.pdf`);
+    });
   }
 }

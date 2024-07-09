@@ -75,4 +75,12 @@ export class AppointmentsBySpecialtyComponent {
       }
     });
   }
+
+  downloadPDF() {
+    this.appService.downloadPDF(
+      'appBySpe',
+      'Cantidad de turnos por especialidad',
+      'Cantidad-Turnos-Por-Especialidad'
+    );
+  }
 }

@@ -8,10 +8,19 @@
 </ngx-spinner>
 
 <ng-container *ngIf="showChart">
-  <ngx-charts-pie-grid
-    [view]="[600, 400]"
-    [scheme]="colorScheme"
-    [results]="data"
+  <div id="appCompleted">
+    <ngx-charts-pie-grid
+      [view]="[600, 400]"
+      [scheme]="colorScheme"
+      [results]="data"
+    >
+    </ngx-charts-pie-grid>
+  </div>
+  <button
+    type="button"
+    class="btn btn-outline-secondary mb-3 mt-3"
+    (click)="downloadPDF()"
   >
-  </ngx-charts-pie-grid>
+    Descargar cantidad de turnos finalizados por médico en este mes
+  </button>
 </ng-container>

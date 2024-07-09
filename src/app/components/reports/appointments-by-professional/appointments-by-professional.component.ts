@@ -6,6 +6,7 @@ import { AppointmentService } from '../../../services/appointment.service';
 import { Appointment } from '../../../interfaces/appointment.interface';
 import { UserInterface } from '../../../interfaces/user.interface';
 import { AuthService } from '../../../services/auth.service';
+
 @Component({
   selector: 'app-appointments-by-professional',
   standalone: true,
@@ -97,5 +98,13 @@ export class AppointmentsByProfessionalComponent {
     if (allLoaded) {
       this.showChart = true;
     }
+  }
+
+  downloadPDF() {
+    this.appService.downloadPDF(
+      'appByProf',
+      'Cantidad de turnos solicitados a un médico este mes',
+      'Cantidad-Turnos-Solicitados-A-Medicos'
+    );
   }
 }

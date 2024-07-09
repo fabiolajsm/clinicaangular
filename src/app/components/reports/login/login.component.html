@@ -7,15 +7,25 @@
   ><p style="color: #edf2f4; font-family: Roboto">Cargando...</p>
 </ngx-spinner>
 
-<ng-container *ngIf="loginDetail.length">
-  <ul *ngFor="let item of loginDetail">
-    <li>Usuario: {{ item.user }}, Último login: {{ item.lastLogin }}</li>
-  </ul>
-</ng-container>
+<ng-container *ngIf="showChart && loginDetail.length">
+  <div id="userLog">
+    <ul *ngFor="let item of loginDetail">
+      <li>Usuario: {{ item.user }}. Último login: {{ item.lastLogin }}</li>
+    </ul>
 
-<ngx-charts-pie-grid
-  [view]="[600, 400]"
-  [scheme]="colorScheme"
-  [results]="data"
->
-</ngx-charts-pie-grid>
+    <ngx-charts-pie-grid
+      [view]="[600, 400]"
+      [scheme]="colorScheme"
+      [results]="data"
+    >
+    </ngx-charts-pie-grid>
+  </div>
+
+  <button
+    type="button"
+    class="btn btn-outline-secondary mb-3 mt-3"
+    (click)="downloadPDF()"
+  >
+    Descargar logs de usuarios
+  </button>
+</ng-container>

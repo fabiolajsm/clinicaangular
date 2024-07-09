@@ -63,4 +63,12 @@ export class AppointmentsByDayComponent {
       }
     });
   }
+
+  downloadPDF() {
+    this.appService.downloadPDF(
+      'appByDay',
+      'Cantidad de turnos por día',
+      'Cantidad-Turnos-Por-Dia'
+    );
+  }
 }

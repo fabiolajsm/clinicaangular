@@ -19,10 +19,7 @@ import {
 } from '@angular/forms';
 import { PatientHistoryComponent } from '../patient-history/patient-history.component';
 import { PatientHistoryService } from '../../services/patient-history.service';
-import {
-  Appointment,
-  PatientHistory,
-} from '../../interfaces/appointment.interface';
+import { Appointment } from '../../interfaces/appointment.interface';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { AppointmentService } from '../../services/appointment.service';
 import { Subscription } from 'rxjs';

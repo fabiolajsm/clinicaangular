@@ -7,6 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { Subscription } from 'rxjs';
 import { Color, NgxChartsModule, ScaleType } from '@swimlane/ngx-charts';
+import { AppointmentService } from '../../../services/appointment.service';
 
 @Component({
   selector: 'app-login',
@@ -26,10 +27,12 @@ export class LoginComponent {
     group: ScaleType.Ordinal,
     domain: ['#5AA454', '#E44D25', '#CFC0BB', '#7aa3e5', '#a8385d', '#aae3f5'],
   };
+  showChart: boolean = false;
 
   constructor(
     private spinner: NgxSpinnerService,
-    private authService: AuthService
+    private authService: AuthService,
+    private appService: AppointmentService
   ) {}
 
   ngOnInit(): void {
@@ -45,6 +48,7 @@ export class LoginComponent {
       .subscribe((history) => {
         this.loginHistory = history;
         this.updateChartData();
+        this.showChart = true;
         this.spinner.hide();
       });
 
@@ -102,5 +106,13 @@ export class LoginComponent {
         value: loginCounts[email],
       };
     });
+  }
+
+  downloadPDF() {
+    this.appService.downloadPDF(
+      'userLog',
+      'Ingresos al sistema',
+      'Ingresos-Al-Sistema'
+    );
   }
 }
