@@ -301,11 +301,9 @@ export class AppointmentActionsComponent {
               return item.comment && hasCancel;
             });
             if (this.role === 'PACIENTE') {
-              this.message = `${
-                hasLeftCancelOrRejected?.role === 'PACIENTE'
-                  ? 'Cancelé por: '
-                  : 'El especialista no pudo atenderte por:'
-              } ${hasLeftCancelOrRejected?.comment}`;
+              this.message = `No se realizó el turno por "${
+                hasLeftCancelOrRejected?.comment
+              }" (Comentario del : ${hasLeftCancelOrRejected?.role?.toLocaleLowerCase()})`;
             } else {
               this.message = `${
                 hasLeftCancelOrRejected?.role === 'PACIENTE'
