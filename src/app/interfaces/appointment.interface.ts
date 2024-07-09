@@ -33,6 +33,7 @@ export interface Appointment {
 }
 
 export interface Appointment_Extra_Info {
+  id: string; // id appointment
   comment: string | undefined;
   diagnosis: string | undefined;
   points: number | undefined; // del 1 al 10

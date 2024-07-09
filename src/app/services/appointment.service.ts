@@ -18,8 +18,6 @@ import {
   Appointment_Extra_Info,
   Status,
 } from '../interfaces/appointment.interface';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 
 @Injectable({
   providedIn: 'root',

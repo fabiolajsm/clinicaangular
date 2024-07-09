@@ -182,9 +182,10 @@ export class AppointmentActionsComponent {
         .getExtraInfoByAppointmentId(this.itemSelected.id)
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe((extraInfo: Appointment_Extra_Info[]) => {
-          const hasDiagnosisAndComment = extraInfo.find(
-            (item) => item.diagnosis && item.comment
-          );
+          const hasDiagnosisAndComment = extraInfo.some((item) => {
+            return item.diagnosis && item.comment;
+          });
+
           this.hasToShowProfessionalReview =
             hasDiagnosisAndComment && status === 'REALIZADO' ? true : false;
 
@@ -193,11 +194,11 @@ export class AppointmentActionsComponent {
           this.hasToShowAnswerRateProfessional =
             hasPoints && status === 'REALIZADO';
 
-          const hasQuality = extraInfo.find((item) => item.quality);
+          const hasQuality = extraInfo.some((item) => item.quality);
           this.hasToShowQuestionnaire = !hasQuality && status === 'REALIZADO';
           this.hasToShowAnswersQuestionnaire =
             hasQuality && status === 'REALIZADO' ? true : false;
-          const hasLeftCancelOrRejected = extraInfo.find((item) => {
+          const hasLeftCancelOrRejected = extraInfo.some((item) => {
             const hasCancel =
               this.itemSelected?.status === 'RECHAZADO' ||
               this.itemSelected?.status === 'CANCELADO';
@@ -221,19 +222,19 @@ export class AppointmentActionsComponent {
         .getExtraInfoByAppointmentId(this.itemSelected.id)
         .pipe(takeUntil(this.unsubscribe$))
         .subscribe((extraInfo: Appointment_Extra_Info[]) => {
-          const hasPointsAndComment = extraInfo.find(
+          const hasPointsAndComment = extraInfo.some(
             (item) => item.points && item.comment
           );
           this.hasToShowPatientReview =
             hasPointsAndComment && status === 'REALIZADO' ? true : false;
 
-          const hasLeftReview = extraInfo.find(
+          const hasLeftReview = extraInfo.some(
             (item) => item.comment && item.diagnosis
           );
           this.hasToShowTheirReviewSpecialist =
             status === 'REALIZADO' && hasLeftReview ? true : false;
 
-          const hasLeftCancelOrRejected = extraInfo.find((item) => {
+          const hasLeftCancelOrRejected = extraInfo.some((item) => {
             const hasCancel =
               this.itemSelected?.status === 'RECHAZADO' ||
               this.itemSelected?.status === 'CANCELADO';
@@ -320,13 +321,24 @@ export class AppointmentActionsComponent {
   }
 
   handleShowForm(): boolean {
-    return (
-      this.hasToShowCancelAction ||
-      this.hasToShowDeclineAction ||
-      this.hasToShowFinishAction ||
-      this.hasToShowQuestionnaire ||
-      this.hasToShowRateProfessional
-    );
+    if (!this.action) return false;
+    switch (this.action) {
+      case 'CALIFICAR':
+      case 'CANCELADO':
+      case 'COMPLETAR_CUESTIONARIO':
+      case 'RECHAZADO':
+        return true;
+      case 'ACEPTADO':
+      case 'VER_CUESTIONARIO':
+      case 'VER_MI_COMENTARIO_DIAGNOSTICO':
+      case 'VER_MOTIVO_DE_BAJA':
+      case 'VER_REVIEW_PACIENTE':
+      case 'VER_REVIEW_PROFESIONAL':
+      case 'VER_REVIEW_PROFESIONAL_PACIENTE':
+        return false;
+      default:
+        return false;
+    }
   }
 
   handleSubmit() {
