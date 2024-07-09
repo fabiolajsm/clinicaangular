@@ -9,8 +9,14 @@
 </ngx-spinner>
 
 <div class="infoContainer">
-  <app-users-table (userSelected)="handleItemSelected($event)" />
-  <app-user-detail [userSelected]="userSelected" [appointments]="appointments" />
+  <app-users-table
+    (userSelected)="handleItemSelected($event)"
+    [appointments]="appointments"
+  />
+  <app-user-detail
+    [userSelected]="userSelected"
+    [appointments]="appointments"
+  />
   <div class="redirectlink">
     <p>¿Quieres agregar un usuario?</p>
     <a routerLink="/register">Ir al registro</a>
