@@ -61,7 +61,7 @@ export class GeneratePdfService {
       lineHeightFactor: 1.2,
     };
     const logo = document.createElement('img') as HTMLImageElement;
-    logo.src = '../../assets/favicon.png';
+    logo.src = 'https://i.ibb.co/j8ZLFZj/favicon.jpg';
 
     logo.onload = () => {
       newDoc.addImage(logo, 'PNG', 35, 15, 60, 60);
