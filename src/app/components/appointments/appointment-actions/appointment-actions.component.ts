@@ -326,6 +326,7 @@ export class AppointmentActionsComponent {
       case 'CALIFICAR':
       case 'CANCELADO':
       case 'COMPLETAR_CUESTIONARIO':
+      case 'REALIZADO':
       case 'RECHAZADO':
         return true;
       case 'ACEPTADO':

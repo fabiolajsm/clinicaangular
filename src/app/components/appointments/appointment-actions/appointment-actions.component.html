@@ -355,7 +355,14 @@
             Cerrar
           </button>
           <button
-            *ngIf="handleShowForm()"
+            *ngIf="
+              action !== 'VER_CUESTIONARIO' &&
+              action !== 'VER_MI_COMENTARIO_DIAGNOSTICO' &&
+              action !== 'VER_MOTIVO_DE_BAJA' &&
+              action !== 'VER_REVIEW_PACIENTE' &&
+              action !== 'VER_REVIEW_PROFESIONAL' &&
+              action !== 'VER_REVIEW_PROFESIONAL_PACIENTE'
+            "
             type="button"
             data-bs-dismiss="modal"
             class="btn btn-primary"
@@ -420,7 +427,8 @@
       data-bs-target="#staticBackdrop"
       (click)="handleClickAction('VER_MOTIVO_DE_BAJA')"
     >
-      Ver motivo de cancelación del turno
+      Ver motivo de
+      {{ itemSelected.status === "RECHAZADO" ? "rechazo" : "cancelación" }}
     </button>
 
     <!-- Buttons for patient actions -->
