@@ -71,12 +71,11 @@
           Paciente
         </th>
         <th scope="col">Estado</th>
-        <ng-container *ngIf="currentUserRole !== 'ADMIN'">
-          <th scope="col">Altura</th>
-          <th scope="col">Peso</th>
-          <th scope="col">Temperatura</th>
-          <th scope="col">Presión arterial</th>
-        </ng-container>
+        <th scope="col">Altura</th>
+        <th scope="col">Peso</th>
+        <th scope="col">Temperatura</th>
+        <th scope="col">Presión arterial</th>
+        <th scope="col">Datos extra</th>
       </tr>
     </thead>
     <tbody>
@@ -114,30 +113,46 @@
           {{ item.patient_name }}
         </td>
         <td [appHighlightStatus]="item.status">{{ item.status }}</td>
-        <ng-container *ngIf="currentUserRole !== 'ADMIN'">
-          <td>
-            {{
-              item.patientHistory?.height | formatPatientHistoryData : "height"
-            }}
-          </td>
-          <td>
-            {{
-              item.patientHistory?.weight | formatPatientHistoryData : "weight"
-            }}
-          </td>
-          <td>
-            {{
-              item.patientHistory?.temperature
-                | formatPatientHistoryData : "temperature"
-            }}
-          </td>
-          <td>
-            {{
-              item.patientHistory?.pressure
-                | formatPatientHistoryData : "pressure"
-            }}
-          </td>
-        </ng-container>
+        <td>
+          {{
+            item.patientHistory?.height | formatPatientHistoryData : "height"
+          }}
+        </td>
+        <td>
+          {{
+            item.patientHistory?.weight | formatPatientHistoryData : "weight"
+          }}
+        </td>
+        <td>
+          {{
+            item.patientHistory?.temperature
+              | formatPatientHistoryData : "temperature"
+          }}
+        </td>
+        <td>
+          {{
+            item.patientHistory?.pressure
+              | formatPatientHistoryData : "pressure"
+          }}
+        </td>
+        <td>
+          <ng-container
+            *ngIf="
+              item.patientHistory &&
+                item.patientHistory.extraData &&
+                getObjectKeys(item.patientHistory.extraData).length > 0;
+              else emptyExtraData
+            "
+          >
+            <ng-container
+              *ngFor="let key of getObjectKeys(item.patientHistory.extraData)"
+            >
+              <strong>{{ key }}:</strong>
+              {{ item.patientHistory.extraData[key] }}
+            </ng-container>
+          </ng-container>
+          <ng-template #emptyExtraData> - </ng-template>
+        </td>
       </tr>
     </tbody>
   </table>
